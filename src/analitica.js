@@ -144,4 +144,22 @@ console.log("================================")
 
 
 
+/// mini reto 3 ////
+
+//metodologias de reduccion //
+
+//con {} //
+("total vendido M")
+
+function totalVendidoM(ventas) {
+    return ventas.reduce((acumuladorTotal, venta) => {
+        return acumuladorTotal + valorVenta(venta);
+    }, 0);
+}
+
+/////
+
+//// con una sola linea ///
+function totalVendidoM(ventas) {
+    return ventas.reduce((acumuladorTotal, venta) => acumuladorTotal + valorVenta(venta), 0);}
 

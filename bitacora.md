@@ -264,3 +264,5 @@ Resultado manual: 356000 Resultado del programa: ventasPorCiudad(ventas, "Medell
 
 
 
+
+
