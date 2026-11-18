@@ -141,200 +141,46 @@ Primero, vamos a identificar las variables:
 
 # 2. como deberia verse el codigo en psint:
 
-```text
-Algoritmo AnalisisDeVentas
+función totalVendido(ventas):
+    total = 0
+    para cada venta en ventas:
+        total = total + venta.cantidad * venta.precio
+    devolver total
 
-    // 1. Definir variables originales
-    Definir i Como Entero
+función unidadesVendidas(ventas):
+    totalUnidades = 0
+    para cada venta en ventas:
+        si venta.cantidad > 0:
+            totalUnidades = totalUnidades + venta.cantidad
+    devolver totalUnidades
 
-    Definir id, cantidad, precio Como Entero
+función ventaMayor(ventas):
+    si ventas está vacío:
+        devolver nulo
+    mayor = primera venta de ventas
+    para cada venta en ventas:
+        si venta.cantidad * venta.precio > mayor.cantidad * mayor.precio:
+            mayor = venta
+    devolver mayor
 
-    Definir fecha, cliente, producto, ciudad Como Cadena
+función ticketPromedio(ventas):
+    total = 0
+    cantidadVentas = 0
+    para cada venta en ventas:
+        si venta.cantidad > 0:
+            total = total + venta.cantidad * venta.precio
+            cantidadVentas = cantidadVentas + 1
+    si cantidadVentas es 0:
+        devolver 0
+    devolver total / cantidadVentas
 
-    // 2. Definir variables de los indicadores
-    Definir unidadesVendidas, ventasValidas, ventasIncorrectas Como Entero
+función ventasPorCiudad(ventas, ciudad):
+    total = 0
+    para cada venta en ventas:
+        si normalizar(venta.ciudad) == normalizar(ciudad):
+            total = total + venta.cantidad * venta.precio
+    devolver total
 
-    Definir valorVenta, ingresosTotales Como Real
-
-    Definir ingresosMedellin, ingresosBogota Como Real
-    Definir ingresosCali, ingresosPereira Como Real
-
-    // 3. Crear arreglos
-    Dimension id[12]
-    Dimension fecha[12]
-    Dimension cliente[12]
-    Dimension producto[12]
-    Dimension ciudad[12]
-    Dimension cantidad[12]
-    Dimension precio[12]
-
-    // 4. Registrar los datos de las ventas
-
-    id[1] <- 1
-    fecha[1] <- "2026-09-01"
-    cliente[1] <- "C01"
-    producto[1] <- "Origen Huila 500 g"
-    ciudad[1] <- "MEDELLIN"
-    cantidad[1] <- 2
-    precio[1] <- 42000
-
-    id[2] <- 2
-    fecha[2] <- "2026-09-01"
-    cliente[2] <- "C02"
-    producto[2] <- "Origen Nariño 250 g"
-    ciudad[2] <- "BOGOTA"
-    cantidad[2] <- 1
-    precio[2] <- 26000
-
-    id[3] <- 3
-    fecha[3] <- "2026-09-02"
-    cliente[3] <- "C03"
-    producto[3] <- "Prensa francesa"
-    ciudad[3] <- "CALI"
-    cantidad[3] <- 1
-    precio[3] <- 95000
-
-    id[4] <- 4
-    fecha[4] <- "2026-09-02"
-    cliente[4] <- "C01"
-    producto[4] <- "Origen Huila 500 g"
-    ciudad[4] <- "MEDELLIN"
-    cantidad[4] <- 1
-    precio[4] <- 42000
-
-    id[5] <- 5
-    fecha[5] <- "2026-09-03"
-    cliente[5] <- "C04"
-    producto[5] <- "Origen Sierra 500 g"
-    ciudad[5] <- "MEDELLIN"
-    cantidad[5] <- 3
-    precio[5] <- 45000
-
-    id[6] <- 6
-    fecha[6] <- "2026-09-03"
-    cliente[6] <- "C05"
-    producto[6] <- "Origen Nariño 250 g"
-    ciudad[6] <- "BOGOTA"
-    cantidad[6] <- 2
-    precio[6] <- 26000
-
-    id[7] <- 7
-    fecha[7] <- "2026-09-04"
-    cliente[7] <- "C02"
-    producto[7] <- "Molino manual"
-    ciudad[7] <- "BOGOTA"
-    cantidad[7] <- 1
-    precio[7] <- 120000
-
-    id[8] <- 8
-    fecha[8] <- "2026-09-04"
-    cliente[8] <- "C06"
-    producto[8] <- "Origen Huila 500 g"
-    ciudad[8] <- "CALI"
-    cantidad[8] <- 0
-    precio[8] <- 42000
-
-    id[9] <- 9
-    fecha[9] <- "2026-09-05"
-    cliente[9] <- "C03"
-    producto[9] <- "Origen Sierra 500 g"
-    ciudad[9] <- "CALI"
-    cantidad[9] <- 2
-    precio[9] <- 45000
-
-    id[10] <- 10
-    fecha[10] <- "2026-09-05"
-    cliente[10] <- "C07"
-    producto[10] <- "Origen Huila 500 g"
-    ciudad[10] <- "PEREIRA"
-    cantidad[10] <- 4
-    precio[10] <- 42000
-
-    id[11] <- 11
-    fecha[11] <- "2026-09-06"
-    cliente[11] <- "C01"
-    producto[11] <- "Prensa francesa"
-    ciudad[11] <- "MEDELLIN"
-    cantidad[11] <- 1
-    precio[11] <- 95000
-
-    id[12] <- 12
-    fecha[12] <- "2026-09-06"
-    cliente[12] <- "C08"
-    producto[12] <- "Origen Nariño 250 g"
-    ciudad[12] <- "BOGOTA"
-    cantidad[12] <- 3
-    precio[12] <- 26000
-
-    // 5. Inicializar acumuladores y contadores
-
-    unidadesVendidas <- 0
-    ingresosTotales <- 0
-
-    ventasValidas <- 0
-    ventasIncorrectas <- 0
-
-    ingresosMedellin <- 0
-    ingresosBogota <- 0
-    ingresosCali <- 0
-    ingresosPereira <- 0
-
-    // 6. Recorrer y procesar las ventas
-
-    Para i <- 1 Hasta 12 Hacer
-
-        Si cantidad[i] > 0 Entonces
-
-            ventasValidas <- ventasValidas + 1
-
-            unidadesVendidas <- unidadesVendidas + cantidad[i]
-
-            valorVenta <- cantidad[i] * precio[i]
-
-            ingresosTotales <- ingresosTotales + valorVenta
-
-            Segun ciudad[i] Hacer
-
-                "MEDELLIN":
-                    ingresosMedellin <- ingresosMedellin + valorVenta
-
-                "BOGOTA":
-                    ingresosBogota <- ingresosBogota + valorVenta
-
-                "CALI":
-                    ingresosCali <- ingresosCali + valorVenta
-
-                "PEREIRA":
-                    ingresosPereira <- ingresosPereira + valorVenta
-
-            FinSegun
-
-        SiNo
-
-            ventasIncorrectas <- ventasIncorrectas + 1
-
-        FinSi
-
-    FinPara
-
-    // 7. Mostrar resultados
-
-    Escribir "INGRESOS TOTALES: $", ingresosTotales
-
-    Escribir "UNIDADES VENDIDAS: ", unidadesVendidas
-
-    Escribir "VENTAS VALIDAS: ", ventasValidas
-
-    Escribir "VENTAS INCORRECTAS: ", ventasIncorrectas
-
-    Escribir "INGRESOS POR CIUDAD:"
-
-    Escribir "MEDELLIN: $", ingresosMedellin
-    Escribir "BOGOTA: $", ingresosBogota
-    Escribir "CALI: $", ingresosCali
-    Escribir "PEREIRA: $", ingresosPereira
-
-FinAlgoritmo
 
 
 ### 1. Los arreglos
@@ -377,7 +223,44 @@ ventasValidas <- ventasValidas + 1
 
 Cada vez que encontramos una venta válida, aumentamos el contador en uno.
 
--------------
+---------------------------------------
+
+mini reto 2 tablas a mano 
+Verificación manual con tablas de traza
+Traza de totalVendido(ventas)
+ID 	Cantidad 	Precio 	Operación 	Total acumulado
+1 	2 	42000 	2 * 42000 = 84000 	84000
+2 	1 	26000 	1 * 26000 = 26000 	110000
+3 	1 	95000 	1 * 95000 = 95000 	205000
+4 	1 	42000 	1 * 42000 = 42000 	247000
+5 	3 	45000 	3 * 45000 = 135000 	382000
+6 	2 	26000 	2 * 26000 = 52000 	434000
+7 	1 	120000 	1 * 120000 = 120000 	554000
+8 	0 	42000 	0 * 42000 = 0 	554000
+9 	2 	45000 	2 * 45000 = 90000 	644000
+10 	4 	42000 	4 * 42000 = 168000 	812000
+11 	1 	95000 	1 * 95000 = 95000 	907000
+12 	3 	26000 	3 * 26000 = 78000 	985000
+
+Resultado manual: 985000 Resultado del programa: totalVendido(ventas) = 985000 Los resultados coinciden.
+Traza de ventasPorCiudad(ventas, "Medellín")
+ID 	Ciudad normalizada 	¿Coincide? 	Valor de la venta 	Total acumulado
+1 	medellín 	Sí 	84000 	84000
+2 	bogotá 	No 	26000 	84000
+3 	cali 	No 	95000 	84000
+4 	medellín 	Sí 	42000 	126000
+5 	medellín 	Sí 	135000 	261000
+6 	bogotá 	No 	52000 	261000
+7 	bogotá 	No 	120000 	261000
+8 	cali 	No 	0 	261000
+9 	cali 	No 	90000 	261000
+10 	pereira 	No 	168000 	261000
+11 	medellín 	Sí 	95000 	356000
+12 	bogotá 	No 	78000 	356000
+
+Resultado manual: 356000 Resultado del programa: ventasPorCiudad(ventas, "Medellín") = 356000 Los resultados coinciden.
+
+
 
 
 
