@@ -15,7 +15,7 @@ function comparar(nombre, resultadoViejo, resultadoNuevo) {
 }
 
 console.log("========================================");
-console.log("VERIFICACION DE METODOS VS BUCLES");
+console.log("VERIFICACION DE METODOS y BUCLES");
 console.log("========================================");
 
 comparar("totalVendido", analitica.totalVendido(ventas), analitica.totalVendidoM(ventas));
@@ -31,8 +31,9 @@ console.log("Unidades por Producto:", analitica.unidadesPorProducto(ventas));
 console.log("Top 3 Productos por Valor:", analitica.topProductosPorValor(ventas, 3));
 
 console.log("========================================");
-console.log("VERIFICANDO INMUTABILIDAD DEL ARREGLO");
+console.log("verificar inmutabilidad del arreglo");
 console.log("========================================");
 
 console.log("Primera venta original (debe ser ID 1):", ventas[0].id);
+
 

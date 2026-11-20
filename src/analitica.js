@@ -7,7 +7,6 @@ function valorVenta(venta) {
     return venta.cantidad * venta.precio;
 }
 
-
 //funciones  mini reto 2//
 
 // 2. Total Vendido (ACUMULADOR) //
@@ -90,6 +89,7 @@ const sinVentas =[];
 
 //tabla de funciones con las entradas//
 //seccion de las entradas con el arreglo completo//
+/*
 separadordos();
 console.log("pruebas con arreglo completo")
 separadordos();
@@ -111,6 +111,7 @@ separadoruno();
 
 console.log("ventas por ciudad:", ventasPorCiudad(ventas, "Medellín"));
 separadoruno();
+
 
 
 // seccion de las entradas con arreglo de un solo elemento //
@@ -154,16 +155,15 @@ separadoruno();
 
 console.log("ventas por ciudad (vacio):", ventasPorCiudad(sinVentas, "medellín"));
 separadoruno();
+*/
 
-separadordos();
 
 
 //mini reto 3 metodos de arreglo//
 //total de ventas M//
 separadordos();
-
 console.log("metodos de arreglo")
-separadoruno();
+separadordos();
 
 separadoruno();
 
@@ -198,20 +198,7 @@ function ventasPorCiudadM(ventas, ciudadBuscada) {
 }
 
 separadoruno();
-separadoruno();
 console.log("ventasporciudadM (Medellín):", ventasPorCiudadM(ventas, "Medellín"));
-
-
-//por variable creada//
-/* 
-function ventasPorCiudadM(ventas, ciudadBuscada) {
-    return ventas
-        // Normalizamos el elemento del arreglo Y el parámetro de búsqueda AL MISMO TIEMPO
-        .filter(venta => venta.ciudad.toLowerCase().trim() === ciudadBuscada.toLowerCase().trim())
-        .reduce((acumulador, ventaFiltrada) => acumulador + valorVenta(ventaFiltrada), 0);
-}
-*/
-//
 
 
 
@@ -265,11 +252,34 @@ function topProductosPorValor(ventas, k) {
     return copiaOrdenada.slice(0, k);
 }
 
+
+//mini reto 3 // fecha especifica
+
+function ventasDelDia(ventas, fechaREQ) {
+    const fechaBuscada = fechaREQ.trim();
+    const ventaDiaFiltrada = ventas.filter(ventas => ventas.fecha.trim() === fechaBuscada);
+    const TotaldelDia =  ventaDiaFiltrada.reduce((total,ventas) => total + valorVenta(ventas),0);
+    const UnidadesalDia = ventaDiaFiltrada.reduce((unidades, ventas) => unidades + ventas.cantidad,0);
+
+}
+
+
+
+ 
+
+
+
+
+
 //  EXPORTACIÓN DE MÓDULOS//
 module.exports = {
+    separadoruno,
+    separadordos,
     valorVenta,
     totalVendido,
     unidadesVendidas,
+    ventaMayor,
+    ticketPromedio,
     ventasPorCiudad,
     totalVendidoM,
     unidadesVendidasM,
