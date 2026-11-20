@@ -1,8 +1,12 @@
+const separadoruno = () => console.log("--------------------------------------");
+const separadordos = () => console.log("===========================================");
+
 const ventas = require("./datos")
 
 function valorVenta(venta) {
     return venta.cantidad * venta.precio;
 }
+
 
 //funciones  mini reto 2//
 
@@ -86,80 +90,192 @@ const sinVentas =[];
 
 //tabla de funciones con las entradas//
 //seccion de las entradas con el arreglo completo//
-console.log("================================")
+separadordos();
 console.log("pruebas con arreglo completo")
-console.log("================================")
+separadordos();
 
 console.log("totalvendido:",totalVendido(ventas));
-console.log("--------------------------------------")
+separadordos();
 
 console.log("unidadesvendidas:", unidadesVendidas(ventas));
-console.log("-----------------------------------")
+separadoruno();
+
 
 console.log("venta mayor:", ventaMayor(ventas));
-console.log("----------------------------------")
+separadoruno();
+
 
 console.log("tiket promedio:", ticketPromedio(ventas));
-console.log("-----------------------------------")
+separadoruno();
+
 
 console.log("ventas por ciudad:", ventasPorCiudad(ventas, "Medellín"));
-console.log("---------------------------------")
+separadoruno();
 
 
 // seccion de las entradas con arreglo de un solo elemento //
-console.log("================================")
+separadordos();
 console.log("pruebas con un solo elemento")
-console.log("================================")
+separadordos();
 
 console.log("total vendido de una venta (por un solo elemento):", totalVendido(unaVenta));
-console.log("-------------------------------------------------")
+separadoruno();
+
 console.log("unidades vendidas (por una solo elemento):", unidadesVendidas(unaVenta));
-console.log("-----------------------------------------------")
+separadoruno();
+
 console.log("venta mayor (por elemento):", ventaMayor(unaVenta));
-console.log("----------------------------------------------")
+separadoruno();
+
 console.log("ticket promedio (por elemento):", ticketPromedio(unaVenta));
-console.log("----------------------------------------------")
+separadoruno();
+
 console.log("ventas por ciudad (por elemento):", ventasPorCiudad(unaVenta, "medellín"));
-console.log("----------------------------------------------")
+separadoruno();
+
 
 
 //seccion de entradas por arreglos vacios//
-console.log("================================")
+separadordos();
 console.log("arreglos vacios")
-console.log("================================")
+separadordos();
 
 console.log("total vendido(vacio):", totalVendido(sinVentas));
-console.log("---------------------------------------------------")
+separadoruno();
+
 console.log("unidades vendidas (vacio):", unidadesVendidas(sinVentas));
-console.log("------------------------------------------------------")
+separadoruno();
+
 console.log("venta mayor (vacio):", ventaMayor(sinVentas));
-console.log("------------------------------------------------------")
+separadoruno();
+
 console.log("ticket promedio (vacio):", ticketPromedio(sinVentas));
-console.log("------------------------------------------------------")
+separadoruno();
+
 console.log("ventas por ciudad (vacio):", ventasPorCiudad(sinVentas, "medellín"));
-console.log("------------------------------------------------------")
+separadoruno();
 
-console.log("================================")
-
-
+separadordos();
 
 
-/// mini reto 3 ////
+//mini reto 3 metodos de arreglo//
+//total de ventas M//
+separadordos();
 
-//metodologias de reduccion //
+console.log("metodos de arreglo")
+separadoruno();
 
-//con {} //
-("total vendido M")
+separadoruno();
 
 function totalVendidoM(ventas) {
-    return ventas.reduce((acumuladorTotal, venta) => {
-        return acumuladorTotal + valorVenta(venta);
-    }, 0);
+    return ventas.reduce((acumulador, venta) => acumulador + valorVenta(venta), 0);
+  
+}
+separadoruno();
+
+console.log("totalVendidoM:", totalVendidoM(ventas));
+separadoruno();
+
+
+
+//unidadesVendidasM//
+
+// Cumple requisito: reduce con valor inicial (0)
+function unidadesVendidasM(ventas) {
+    return ventas.reduce((acumulador, venta) => acumulador + venta.cantidad, 0);
+}
+separadoruno();
+
+console.log("unidadesVendidasM:", unidadesVendidasM(ventas));
+separadoruno();
+
+
+//ventasPorCiudadM//
+function ventasPorCiudadM(ventas, ciudadBuscada) {
+    return ventas
+        .filter(venta => venta.ciudad.toLowerCase().trim() === ciudadBuscada.toLowerCase().trim())
+        .reduce((acumulador, ventaFiltrada) => acumulador + valorVenta(ventaFiltrada), 0);
 }
 
-/////
+separadoruno();
+separadoruno();
+console.log("ventasporciudadM (Medellín):", ventasPorCiudadM(ventas, "Medellín"));
 
-//// con una sola linea ///
-function totalVendidoM(ventas) {
-    return ventas.reduce((acumuladorTotal, venta) => acumuladorTotal + valorVenta(venta), 0);}
+
+//por variable creada//
+/* 
+function ventasPorCiudadM(ventas, ciudadBuscada) {
+    return ventas
+        // Normalizamos el elemento del arreglo Y el parámetro de búsqueda AL MISMO TIEMPO
+        .filter(venta => venta.ciudad.toLowerCase().trim() === ciudadBuscada.toLowerCase().trim())
+        .reduce((acumulador, ventaFiltrada) => acumulador + valorVenta(ventaFiltrada), 0);
+}
+*/
+//
+
+
+
+// FASE 3: AGRUPACIONES Y RANKINGS
+
+
+// 4. Total por Ciudad (Diccionario)
+function totalPorCiudad(ventas) {
+    return ventas.reduce((acumulador, venta) => {
+        // Normalizamos y capitalizamos la primera letra
+        let ciudad = venta.ciudad.trim().toLowerCase();
+        ciudad = ciudad.charAt(0).toUpperCase() + ciudad.slice(1);
+
+        // Usamos el operador || para inicializar en 0 si no existe
+        acumulador[ciudad] = (acumulador[ciudad] || 0) + valorVenta(venta);
+        
+        return acumulador;
+    }, {});
+}
+
+// 5. Unidades por Producto (Diccionario)
+function unidadesPorProducto(ventas) {
+    return ventas.reduce((acumulador, venta) => {
+        const producto = venta.producto;
+        acumulador[producto] = (acumulador[producto] || 0) + venta.cantidad;
+        return acumulador;
+    }, {});
+}
+
+// 6. Top Productos por Valor (Ranking)
+
+
+function topProductosPorValor(ventas, k) {
+
+    const valorPorProducto = ventas.reduce((acumulador, venta) => {
+        const producto = venta.producto;
+        acumulador[producto] = (acumulador[producto] || 0) + valorVenta(venta);
+        return acumulador;
+    }, {});
+
+  
+    const arrayDeProductos = Object.entries(valorPorProducto);
+
+
+    const productosMapeados = arrayDeProductos.map(([nombre, valor]) => ({ nombre, valor }));
+
+    
+    const copiaOrdenada = [...productosMapeados].sort((a, b) => b.valor - a.valor);
+
+   
+    return copiaOrdenada.slice(0, k);
+}
+
+//  EXPORTACIÓN DE MÓDULOS//
+module.exports = {
+    valorVenta,
+    totalVendido,
+    unidadesVendidas,
+    ventasPorCiudad,
+    totalVendidoM,
+    unidadesVendidasM,
+    ventasPorCiudadM,
+    totalPorCiudad,
+    unidadesPorProducto,
+    topProductosPorValor
+};
 

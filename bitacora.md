@@ -263,6 +263,87 @@ Resultado manual: 356000 Resultado del programa: ventasPorCiudad(ventas, "Medell
 
 
 
+Funcion: totalVendidoM
+
+¿Que recorro? Todo el arreglo de ventas.
+
+¿Que filtro? Nada, recorro todos los elementos.
+
+¿Que transformo? Cada objeto de venta a un valor numérico usando la función valorVenta().
+
+¿Que acumulo? La suma total del dinero de todas las ventas.
+
+¿Como agrupo? No agrupo, solo devuelvo un único valor total.
+
+Funcion: unidadesVendidasM
+
+¿Que recorro? Todo el arreglo de ventas.
+
+¿Que filtro? Nada, recorro todos los elementos.
+
+¿Que transformo? Extraigo la propiedad cantidad de cada objeto.
+
+¿Que acumulo? La suma de las cantidades de todos los productos.
+
+¿Como agrupo? No agrupo, solo devuelvo un único valor total.
+
+Funcion: ventasPorCiudadM
+
+¿Que recorro? El arreglo de ventas (primero se filtra y luego se reduce).
+
+¿Que filtro? Solo las ventas cuya ciudad coincida con la ciudadBuscada, ignorando mayúsculas y espacios sobrantes.
+
+¿Que transformo? El texto de la ciudad a minúsculas y sin espacios extremos para poder comparar correctamente.
+
+¿Que acumulo? El dinero total de las ventas que pasaron el filtro.
+
+¿Como agrupo? No agrupo, solo devuelvo el total de una ciudad específica.
+
+Funcion: totalPorCiudad
+
+¿Que recorro? Todo el arreglo de ventas.
+
+¿Que filtro? Nada, recorro todos los elementos.
+
+¿Que transformo? El nombre de la ciudad (lo paso a minúsculas, quito espacios y capitalizo la primera letra para unificar "Bogotá" y "Bogotá ").
+
+¿Que acumulo? El dinero total por cada ciudad.
+
+¿Como agrupo? Creando un diccionario (objeto) donde la llave es el nombre de la ciudad y el valor es la suma de sus ventas.
+
+Funcion: unidadesPorProducto
+
+¿Que recorro? Todo el arreglo de ventas.
+
+¿Que filtro? Nada, recorro todos los elementos.
+
+¿Que transformo? Nada, tomo directamente el nombre del producto.
+
+¿Que acumulo? La cantidad de unidades vendidas.
+
+¿Como agrupo? Creando un diccionario (objeto) donde la llave es el nombre del producto y el valor es el total de unidades.
+
+Funcion: topProductosPorValor
+
+¿Que recorro? El arreglo de ventas (para acumular) y luego el arreglo de pares generado por Object.entries (para ordenar).
+
+¿Que filtro? Nada, recorro todos los elementos.
+
+¿Que transformo? El objeto diccionario a un arreglo de arreglos con Object.entries, y luego a un arreglo de objetos con map.
+
+¿Que acumulo? El dinero total generado por cada producto.
+
+¿Como agrupo? Primero agrupo por producto en un diccionario, luego ordeno de mayor a menor con sort (creando una copia con spread operator) y finalmente corto el top con slice.
+
+Verificación Final (Checklist)
+☑ Versiones con métodos (totalVendidoM, unidadesVendidasM, ventasPorCiudadM): Creadas.
+☑ verificar.js: Creado y muestra exactamente "OK" o "DIFERENTE".
+☑ totalPorCiudad: Creado, devuelve objeto, normaliza nombres.
+☑ unidadesPorProducto: Creado, agrupa y suma.
+☑ topProductosPorValor: Creado, devuelve top k, no modifica el original (inmutabilidad garantizada con [...]).
+
+
+
 
 
 
