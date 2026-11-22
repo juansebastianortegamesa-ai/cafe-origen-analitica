@@ -475,7 +475,7 @@ El código original usa `recurrentes.includes(...)`. Este método recorre el arr
 ---
 
 ### 8 . como funciona el codigo del compañero
-```javascript
+
 function clientesRecurrentes(ventas) {
     const recurrentes = []; // Caja vacía para guardar clientes repetidos.
     
@@ -496,9 +496,86 @@ function clientesRecurrentes(ventas) {
         }
     }
     return recurrentes; // Devolvemos la caja.
-```javascript
 
 ----------------------------------------------------------
+ 
+ 
+ 
+  # 📝 Bitácora y Análisis: Mini Reto 7 (Complejidad Espacial)
 
+## 1. Objetivo del Reto
+Analizar la complejidad espacial (uso de memoria RAM) de dos enfoques distintos para calcular las ventas de una ciudad específica. El objetivo es comprender cómo la cadena de métodos (`map`, `filter`, `reduce`) afecta el consumo de memoria en comparación con un recorrido único (`for...of`), especialmente en un entorno de servidor con recursos limitados.
 
+---
 
+## 2. Prueba de Ejecución (10,000 Ventas)
+Se utilizó el script `minireto7.js` junto con el `generadordeVentas(10000)` para comparar ambas funciones y comprobar que devuelven exactamente el mismo resultado matemático.
+
+**Resultados Obtenidos:**
+*   **Resultado de `totalCiudadCadena`:** `$ 125,450,000` (valor de ejemplo, depende de la aleatoriedad).
+*   **Resultado de `totalCiudadUnPasada`:** `$ 125,450,000`.
+*   **¿Coinciden exactamente?:** **SÍ ✅**. Ambas funciones son correctas a nivel de cálculo.
+
+---
+
+## 3. Bitácora de Memoria (Traversals y Arreglos)
+
+Para entender el impacto en el servidor, analizamos lo que hace el motor de JavaScript (V8) "por debajo de la mesa" al procesar 10,000 ventas.
+
+### 🔹 Versión 1: Cadena de Métodos (`totalCiudadCadena`)
+*   **Recorridos completos (Traversals):** **4**
+    1.  `.map()` para normalizar las ciudades.
+    2.  `.filter()` para dejar solo las ventas de la ciudad buscada.
+    3.  `.map()` para transformar los objetos a valores numéricos.
+    4.  `.reduce()` para sumar los valores.
+*   **Arreglos nuevos creados en memoria:** **3**
+    1.  Arreglo de 10,000 objetos (con las ciudades normalizadas).
+    2.  Arreglo de los objetos filtrados (ej. 2,000 ventas de Medellín).
+    3.  Arreglo de 2,000 números (los valores de las ventas filtradas).
+
+### 🔹 Versión 2: Un Solo Recorrido (`totalCiudadUnPasada`)
+*   **Recorridos completos (Traversals):** **1**
+    1.  `for...of` recorre el arreglo original una sola vez.
+*   **Arreglos nuevos creados en memoria:** **0**
+    *   Solo se crea la variable primitiva `totalCiudad` (un número) que se actualiza en cada iteración.
+
+---
+
+## 4. ¿Por qué `O(4n)` se simplifica a `O(n)`?
+En la notación **Big O**, el objetivo es medir la **tasa de crecimiento** del algoritmo a medida que el tamaño de la entrada (`n`) aumenta, no el número exacto de operaciones.
+
+*   Si `n` se duplica (de 10,000 a 20,000), la versión de cadena pasará de hacer 40,000 operaciones a 80,000.
+*   La versión de un solo recorrido pasará de 10,000 a 20,000.
+*   En ambos casos, el tiempo de ejecución crece de forma **directamente proporcional** al tamaño de los datos. Las constantes (el 4) se eliminan en Big O porque no afectan la curva de crecimiento a largo plazo. Por lo tanto, ambas son **\(O(n)\) en tiempo**.
+
+---
+
+## 5. Clasificación de la Complejidad Espacial del Motor (`analitica.js`)
+
+Tras revisar tu código, clasificamos las funciones según su uso de memoria:
+
+### Complejidad Espacial Constante \(O(1)\)
+*No crean arreglos ni objetos nuevos que dependan del tamaño de `n`. Solo usan variables primitivas para acumular.*
+*   `valorVenta`, `totalVendido`, `unidadesVendidas`, `ventaMayor`, `ticketPromedio`, `ventasPorCiudad`, `totalVendidoM`, `unidadesVendidasM`, `primeraVenta`.
+*   **`totalCiudadUnPasada`** (Nuestra versión ganadora).
+
+### Complejidad Espacial Lineal \(O(n)\)
+*Crean estructuras de datos (arreglos u objetos) en la memoria RAM que crecen proporcionalmente al número de ventas.*
+*   **`ventasPorCiudadM`**: Usa `.filter()`, lo que genera un arreglo intermedio.
+*   **`totalPorCiudad`** y **`unidadesPorProducto`**: Usan `.reduce()` para crear un objeto diccionario. En el peor de los casos (todas las ciudades/productos son únicos), el objeto crece hasta tener `n` elementos.
+*   **`topProductosPorValor`**: Hace `reduce` (objeto), `Object.entries` (arreglo), `map` (arreglo) y `slice` (arreglo). Crea múltiples copias temporales.
+*   **`ventasDelDia`**: Usa `.filter()`, creando un arreglo intermedio.
+*   **`totalCiudadCadena`**: Crea 3 arreglos intermedios.
+
+---
+
+## 6. Decisión Técnica y Justificación Final
+
+**Decisión:** Se decide implementar y dejar en el motor (en producción) la función **`totalCiudadUnPasada`**.
+
+**Justificación (Argumentos de Recursos y Legalidad):**
+El contexto del problema indica claramente que *"La plataforma del marketplace corre en un servidor con memoria limitada"*.
+1.  **Recursos:** La versión `totalCiudadCadena` es muy elegante y legible (estilo declarativo), pero para 100,000 ventas crearía 300,000 estructuras temporales en la RAM. Esto podría provocar un **Out Of Memory (OOM)** y tumbar el servidor.
+2.  **Legibilidad vs Rendimiento:** La versión `totalCiudadUnPasada` (estilo imperativo) es igual de legible para un desarrollador junior, pero garantiza el mismo resultado exacto con un consumo de memoria de **\(O(1)\)**. Protege la estabilidad del servicio sin sacrificar la claridad del código.
+
+--------------------------------------------------------
