@@ -244,6 +244,7 @@ ID 	Cantidad 	Precio 	Operación 	Total acumulado
 
 Resultado manual: 985000 Resultado del programa: totalVendido(ventas) = 985000 Los resultados coinciden.
 Traza de ventasPorCiudad(ventas, "Medellín")
+
 ID 	Ciudad normalizada 	¿Coincide? 	Valor de la venta 	Total acumulado
 1 	medellín 	Sí 	84000 	84000
 2 	bogotá 	No 	26000 	84000
@@ -259,7 +260,6 @@ ID 	Ciudad normalizada 	¿Coincide? 	Valor de la venta 	Total acumulado
 12 	bogotá 	No 	78000 	356000
 
 Resultado manual: 356000 Resultado del programa: ventasPorCiudad(ventas, "Medellín") = 356000 Los resultados coinciden.
-
 
 
 
@@ -335,13 +335,27 @@ Funcion: topProductosPorValor
 
 ¿Como agrupo? Primero agrupo por producto en un diccionario, luego ordeno de mayor a menor con sort (creando una copia con spread operator) y finalmente corto el top con slice.
 
-Verificación Final (Checklist)
-☑ Versiones con métodos (totalVendidoM, unidadesVendidasM, ventasPorCiudadM): Creadas.
-☑ verificar.js: Creado y muestra exactamente "OK" o "DIFERENTE".
-☑ totalPorCiudad: Creado, devuelve objeto, normaliza nombres.
-☑ unidadesPorProducto: Creado, agrupa y suma.
-☑ topProductosPorValor: Creado, devuelve top k, no modifica el original (inmutabilidad garantizada con [...]).
 
+MINI RETO 4 
+
+## MINI RETO 4: Registro de Depuración
+### Error 1: Caída del sistema al calcular ventas por ciudad
+
+*   **Síntoma:** La terminal se cerraba abruptamente mostrando el mensaje `TypeError: Cannot read properties of undefined (reading 'toLowerCase')`.
+*   **Entrada que lo produce:** Llamar a la función `ventasPorCiudadM(ventas)` sin pasarle el segundo parámetro.
+*   **Hipótesis:** La función esperaba recibir la variable `ciudadBuscada`, pero al no enviarla, su valor era `undefined`. Al intentar ejecutar el método `.toLowerCase()` sobre un valor indefinido, JavaScript generaba un error y detenía la ejecución.
+*   **Prueba realizada:** Se agregó un `console.log(ciudadBuscada)` al inicio de la función para verificar su valor. Al ejecutar, la consola imprimió `undefined`, confirmando la hipótesis.
+*   **Causa:** Error humano (omisión) al momento de invocar la función, olvidando el segundo argumento requerido.
+*   **Corrección:** Se modificó la llamada en el archivo de pruebas para que quedara así: `ventasPorCiudadM(ventas, "Medellín")`.
+
+### Error 2: Reporte con valores NaN o undefined en días sin ventas
+
+*   **Síntoma:** Al generar el reporte para una fecha en la que no hubo ventas (ej. `2026-12-25`), los totales se mostraban como `NaN` (Not a Number) o `undefined` en lugar de `$ 0`.
+*   **Entrada que lo produce:** Ejecutar `ventasDelDia(ventas, "2026-12-25")` donde el arreglo filtrado resultaba vacío (`[]`).
+*   **Hipótesis:** Al filtrar y no encontrar registros, el arreglo quedaba vacío. Al intentar usar `reduce` sobre un arreglo vacío sin valor inicial, JavaScript fallaba o devolvía un valor indefinido. Además, dividir por cero en promedios generaba `NaN`.
+*   **Prueba realizada:** Se llamó a la función `ventasDelDia` con una fecha inexistente y se imprimió el objeto resultante por consola. Efectivamente, el total era `undefined`.
+*   **Causa:** Falta de validación de casos borde (arreglos vacíos) en las funciones de cálculo matemático.
+*   **Corrección:** Se agregó el valor inicial `0` al final de las funciones `reduce` en `ventasDelDia` y se añadieron las validaciones `if (ventas.length === 0) return 0;` en las funciones matemáticas (como `ticketPromedio`) para evitar divisiones por cero. Ahora el reporte muestra correctamente `$ 0` y `0` unidades.
 
 
 

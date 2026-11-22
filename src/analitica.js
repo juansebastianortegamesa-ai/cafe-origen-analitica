@@ -30,7 +30,7 @@ function unidadesVendidas(ventas) {
 // 4. Venta Mayor //
 function ventaMayor(ventas) {
 
-    if (ventas.length === 0) return 0; 
+    if (ventas.length === 0) return null; 
 
     let valorMaximo = 0;
     let registroCompleto = null; 
@@ -82,14 +82,14 @@ function ventasPorCiudad(ventas, ciudadBuscada) {
     return totalCiudad;
 }
 
-//exepciones para lo de la tabla de entrada//
+//excepciones para lo de la tabla de entrada//
 const unaVenta =[ventas[0]]
 const sinVentas =[];
 
 
 //tabla de funciones con las entradas//
 //seccion de las entradas con el arreglo completo//
-/*
+
 separadordos();
 console.log("pruebas con arreglo completo")
 separadordos();
@@ -155,7 +155,6 @@ separadoruno();
 
 console.log("ventas por ciudad (vacio):", ventasPorCiudad(sinVentas, "medellín"));
 separadoruno();
-*/
 
 
 
@@ -257,19 +256,15 @@ function topProductosPorValor(ventas, k) {
 
 function ventasDelDia(ventas, fechaREQ) {
     const fechaBuscada = fechaREQ.trim();
-    const ventaDiaFiltrada = ventas.filter(ventas => ventas.fecha.trim() === fechaBuscada);
-    const TotaldelDia =  ventaDiaFiltrada.reduce((total,ventas) => total + valorVenta(ventas),0);
-    const UnidadesalDia = ventaDiaFiltrada.reduce((unidades, ventas) => unidades + ventas.cantidad,0);
+    const ventaDiaFiltrada = ventas.filter(venta => venta.fecha.trim() === fechaBuscada);
+    const totalDelDia = ventaDiaFiltrada.reduce((total, venta) => total + valorVenta(venta), 0);
+    const unidadesDelDia = ventaDiaFiltrada.reduce((unidades, venta) => unidades + venta.cantidad, 0);
 
+    return {
+        total: totalDelDia,
+        unidades: unidadesDelDia
+    };
 }
-
-
-
- 
-
-
-
-
 
 //  EXPORTACIÓN DE MÓDULOS//
 module.exports = {
@@ -286,6 +281,7 @@ module.exports = {
     ventasPorCiudadM,
     totalPorCiudad,
     unidadesPorProducto,
-    topProductosPorValor
+    topProductosPorValor,
+    ventasDelDia
 };
 
