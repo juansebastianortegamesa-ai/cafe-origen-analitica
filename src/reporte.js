@@ -70,3 +70,4 @@ console.log(`\nDia: ${diaVacio} (Sin registros)`);
 console.log(`  Total: ${formatoCOP(reporteDia2.total)} | Unidades: ${reporteDia2.unidades}`);
 
 
+
