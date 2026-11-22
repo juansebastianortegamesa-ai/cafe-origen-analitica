@@ -25,3 +25,21 @@ console.log("VERIFICANDO INMUTABILIDAD DEL ARREGLO");
 console.log("========================================");
 console.log("Primera venta original (debe ser ID 1):", ventas[0].id);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

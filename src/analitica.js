@@ -203,8 +203,7 @@ console.log("ventasporciudadM (Medellín):", ventasPorCiudadM(ventas, "Medellín
 
 // FASE 3: AGRUPACIONES Y RANKINGS
 
-
-// 4. Total por Ciudad (Diccionario)
+//  Total por Ciudad (Diccionario)
 function totalPorCiudad(ventas) {
     return ventas.reduce((acumulador, venta) => {
         // Normalizamos y capitalizamos la primera letra
@@ -218,7 +217,7 @@ function totalPorCiudad(ventas) {
     }, {});
 }
 
-// 5. Unidades por Producto (Diccionario)
+//  Unidades por Producto (Diccionario)
 function unidadesPorProducto(ventas) {
     return ventas.reduce((acumulador, venta) => {
         const producto = venta.producto;
@@ -227,7 +226,7 @@ function unidadesPorProducto(ventas) {
     }, {});
 }
 
-// 6. Top Productos por Valor (Ranking)
+//  Top Productos por Valor (Ranking)
 
 
 function topProductosPorValor(ventas, k) {
@@ -268,7 +267,7 @@ function ventasDelDia(ventas, fechaREQ) {
 
 
 
-//mini reto 5  funciones para medir el tiempo //
+//mini reto 5  funciones para medir el tiempo // (ESTAS SON LAS FUNCIONES INSTRUMENTADAS)
 
 function totalVendidoMedido(ventas, contador) {
     for (const venta of ventas) {
@@ -310,7 +309,6 @@ function primeraVenta(ventas, contador) {
 }
 
 
-
 //  EXPORTACIÓN DE MÓDULOS//
 module.exports = {
     separadoruno,
@@ -333,4 +331,6 @@ module.exports = {
     totalPorCiudadMedido,
     primeraVenta
 };
+
+
 
