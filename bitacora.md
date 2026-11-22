@@ -361,3 +361,59 @@ MINI RETO 4
 
 
 
+
+# 📝 Bitácora de Desarrollo: Medición de Rendimiento y Complejidad Algorítmica
+
+## 1. contexto del mini reto 5
+El objetivo de esta práctica fue construir un generador de datos masivos (`generarVentas(n)`) para simular el crecimiento de una base de datos y, posteriormente, instrumentar las funciones analíticas (`totalVendido`, `ventaMayor`, `totalPorCiudad` y una función extra `primeraVenta`) con un objeto contador. Esto permitió medir empíricamente el número de operaciones y el tiempo de ejecución al escalar los datos a 100, 1.000, 10.000 y 100.000 registros.
+
+## 2. Predicciones (Hipótesis Inicial)
+Antes de ejecutar el código, analizamos la lógica de los bucles y establecimos las siguientes predicciones:
+*   **Funciones con bucles (`totalVendido`, `ventaMayor`, `totalPorCiudad`):** Si el tamaño de los datos (`n`) se multiplica por 10, el número de operaciones debería multiplicarse también por 10. Si se pasan 1.000 ventas, el bucle se ejecutará 1.000 veces.
+*   **Función de acceso directo (`primeraVenta`):** Al no tener bucles y acceder directamente al primer índice del arreglo (`ventas[0]`), el número de operaciones debería ser siempre 1, sin importar si hay 10 o 100.000 ventas.
+*   **Tiempo de ejecución:** Se predijo que las funciones lineales tardarían proporcionalmente más a medida que crece `n`, mientras que `primeraVenta` mantendría un tiempo casi instantáneo y constante.
+
+## 3. Resultados Obtenidos (Ejecución Real)
+Al ejecutar el script `src/medir.js`, obtuvimos la siguiente tabla de rendimiento:
+
+| Función | Tamaño (n) | Operaciones | Tiempo (ms) |
+| :--- | :--- | :--- | :--- |
+| totalVendido | 100 | 100 | 0.0331 |
+| ventaMayor | 100 | 106 | 0.0379 |
+| totalPorCiudad | 100 | 100 | 0.0003 |
+| primeraVenta | 100 | **1** | 0.0152 |
+| totalVendido | 1,000 | 1,000 | 0.0799 |
+| ventaMayor | 1,000 | 1,003 | 0.2459 |
+| totalPorCiudad | 1,000 | 1,000 | 0.0010 |
+| primeraVenta | 1,000 | **1** | 0.0010 |
+| totalVendido | 10,000 | 10,000 | 1.3495 |
+| ventaMayor | 10,000 | 10,003 | 0.3178 |
+| totalPorCiudad | 10,000 | 10,000 | 1.5762 |
+| primeraVenta | 10,000 | **1** | 0.0022 |
+| totalVendido | 100,000 | 100,000 | 8.9946 |
+| ventaMayor | 100,000 | 100,004 | 0.8261 |
+| totalPorCiudad | 100,000 | 100,000 | 13.4422 |
+| primeraVenta | 100,000 | **1** | 0.0045 |
+
+## 4. Comparación: Predicción vs. Realidad
+*   **Cumplimiento de la linealidad:** Se confirmó la predicción. En `totalVendido` y `totalPorCiudad`, las operaciones fueron exactamente 100, 1.000, 10.000 y 100.000. Al multiplicar `n` por 10, las operaciones se multiplicaron por 10.
+*   **El caso de `ventaMayor`:** Aunque sigue la tendencia lineal, las operaciones fueron ligeramente mayores (ej. 106 en lugar de 100). Esto ocurre porque el código tiene un condicional `if (valorActual > valorMaximo)`. Las operaciones extra corresponden a las veces que el código entró en ese `if` para actualizar el valor máximo.
+*   **El caso de `primeraVenta`:** Se mantuvo con exactamente **1 operación** en todos los escenarios, demostrando que su costo computacional es independiente del tamaño del arreglo.
+*   **El caso del Tiempo:** Los tiempos reales fluctúan (ej. `totalPorCiudad` tomó 13.44 ms en 100.000 registros, mientras que `ventaMayor` tomó 0.82 ms). Esto se debe a que `totalPorCiudad` usa métodos de string (`toLowerCase`, `trim`, etc.), los cuales consumen más recursos del procesador que la simple comparación de números.
+
+## 5. Clasificación Big O y Justificación Técnica
+A partir del análisis de código y los resultados empíricos, clasificamos las funciones de la siguiente manera:
+
+*   **`totalVendido` (O(n) - Tiempo Lineal):** 
+    *   *Justificación:* Utiliza un bucle `for...of` que recorre el arreglo completo una sola vez. El número de operaciones crece de forma directamente proporcional al número de ventas (n).
+*   **`ventaMayor` (O(n) - Tiempo Lineal):**
+    *   *Justificación:* Itera sobre todo el arreglo para comparar cada venta con el máximo actual. Aunque tiene un pequeño costo extra por el condicional `if`, su comportamiento asintótico sigue siendo lineal.
+*   **`totalPorCiudad` (O(n) - Tiempo Lineal):**
+    *   *Justificación:* Utiliza el método `.reduce()`, el cual internamente itera sobre todos los elementos del arreglo exactamente una vez. El número de operaciones es igual a n.
+*   **`primeraVenta` (O(1) - Tiempo Constante):**
+    *   *Justificación:* No tiene bucles. Accede directamente a la posición `[0]` del arreglo en la memoria. Realiza exactamente 1 operación, sin importar si hay 10 o 1.000.000 de elementos.
+*   *(Nota: Ninguna función de este reto es O(n²). Para que existiera una O(n²), tendríamos que tener un bucle `for` dentro de otro bucle `for`, recorriendo el mismo arreglo).*
+
+## 6. Conclusión del Aprendizaje
+Esta práctica demuestra por qué la notación **Big O** es vital en el desarrollo backend. La diferencia entre una función O(1) y una O(n) es abismal cuando hablamos de millones de registros en una base de datos real. Gracias a esta instrumentación, comprobamos que la cantidad de operaciones (el contador) es un reflejo matemático exacto de la complejidad algorítmica, mientras que el tiempo en milisegundos puede variar por factores del hardware o el motor de Node.js (como el recolector de basura o el manejo de strings).
+

@@ -266,6 +266,51 @@ function ventasDelDia(ventas, fechaREQ) {
     };
 }
 
+
+
+//mini reto 5  funciones para medir el tiempo //
+
+function totalVendidoMedido(ventas, contador) {
+    for (const venta of ventas) {
+        contador.operaciones += 1; 
+    }
+    return totalVendido(ventas); 
+}
+
+function ventaMayorMedido(ventas, contador) {
+    if (ventas.length === 0) return null; 
+    let valorMaximo = 0;
+    let registroCompleto = null; 
+
+    for (const venta of ventas) {
+        contador.operaciones += 1; 
+        const valorActual = valorVenta(venta); 
+        if (valorActual > valorMaximo) {
+            contador.operaciones += 1; 
+            valorMaximo = valorActual; 
+            registroCompleto = venta;  
+        }
+    }
+    return registroCompleto;
+}
+
+function totalPorCiudadMedido(ventas, contador) {
+    return ventas.reduce((acumulador, venta) => {
+        contador.operaciones += 1; 
+        let ciudad = venta.ciudad.trim().toLowerCase();
+        ciudad = ciudad.charAt(0).toUpperCase() + ciudad.slice(1);
+        acumulador[ciudad] = (acumulador[ciudad] || 0) + valorVenta(venta);
+        return acumulador;
+    }, {}); 
+}
+
+function primeraVenta(ventas, contador) {
+    contador.operaciones += 1; 
+    return ventas.length > 0 ? ventas[0] : null; 
+}
+
+
+
 //  EXPORTACIÓN DE MÓDULOS//
 module.exports = {
     separadoruno,
@@ -282,6 +327,10 @@ module.exports = {
     totalPorCiudad,
     unidadesPorProducto,
     topProductosPorValor,
-    ventasDelDia
+    ventasDelDia,
+    totalVendidoMedido,
+    ventaMayorMedido,
+    totalPorCiudadMedido,
+    primeraVenta
 };
 
