@@ -359,7 +359,7 @@ MINI RETO 4
 *   **Corrección:** Se agregó el valor inicial `0` al final de las funciones `reduce` en `ventasDelDia` y se añadieron las validaciones `if (ventas.length === 0) return 0;` en las funciones matemáticas (como `ticketPromedio`) para evitar divisiones por cero. Ahora el reporte muestra correctamente `$ 0` y `0` unidades.
 
 -------------------------------------------------------------------------------------------------------
-# 📝 Bitácora de Desarrollo: Medición de Rendimiento y Complejidad Algorítmica
+# Bitácora de Desarrollo: Medición de Rendimiento y Complejidad Algorítmica
 
 ## 1. contexto del mini reto 5
 El objetivo de esta práctica fue construir un generador de datos masivos (`generarVentas(n)`) para simular el crecimiento de una base de datos y, posteriormente, instrumentar las funciones analíticas (`totalVendido`, `ventaMayor`, `totalPorCiudad` y una función extra `primeraVenta`) con un objeto contador. Esto permitió medir empíricamente el número de operaciones y el tiempo de ejecución al escalar los datos a 100, 1.000, 10.000 y 100.000 registros.
@@ -474,9 +474,11 @@ El código original usa `recurrentes.includes(...)`. Este método recorre el arr
 
 ---
 
-### 8 . como funciona el codigo del compañero
+### 8 . como funciona el codigo del compañero (esto del mini reto 6)
 
 function clientesRecurrentes(ventas) {
+
+
     const recurrentes = []; // Caja vacía para guardar clientes repetidos.
     
     // i es el "Ancla". Recorre desde 0 hasta el final.
@@ -496,12 +498,12 @@ function clientesRecurrentes(ventas) {
         }
     }
     return recurrentes; // Devolvemos la caja.
-
+}
 ----------------------------------------------------------
  
  
  
-  # 📝 Bitácora y Análisis: Mini Reto 7 (Complejidad Espacial)
+ #  Bitácora y Análisis: Mini Reto 7 (Complejidad Espacial)
 
 ## 1. Objetivo del Reto
 Analizar la complejidad espacial (uso de memoria RAM) de dos enfoques distintos para calcular las ventas de una ciudad específica. El objetivo es comprender cómo la cadena de métodos (`map`, `filter`, `reduce`) afecta el consumo de memoria en comparación con un recorrido único (`for...of`), especialmente en un entorno de servidor con recursos limitados.
@@ -579,3 +581,55 @@ El contexto del problema indica claramente que *"La plataforma del marketplace c
 2.  **Legibilidad vs Rendimiento:** La versión `totalCiudadUnPasada` (estilo imperativo) es igual de legible para un desarrollador junior, pero garantiza el mismo resultado exacto con un consumo de memoria de **\(O(1)\)**. Protege la estabilidad del servicio sin sacrificar la claridad del código.
 
 --------------------------------------------------------
+
+
+##  MINI RETO 8 PUNTO 6. Observaciones del Compañero (Peer Review v0.2)
+---
+
+## 6. Observaciones del Compañero (Peer Review v0.2)
+
+**Nombre del Revisor:** [juan pablo morales salazar]
+**Fecha:** [23/11/2026]
+
+**Observaciones del compañero:**
+"Revisé la bitácora y el archivo `RENDIMIENTO.md`. La traza manual y el análisis de por qué el tiempo se multiplica por 4 están bien fundamentados. La propuesta de optimización con `Set` es la más adecuada para eliminar los ciclos anidados. Como recomendación, sugiero asegurar el uso de `Array.from()` al retornar el `Set` para no alterar el tipo de dato de salida original."
+
+**Respuesta del autor:** (juan sebastian ortega mesa)
+"Gracias por la revisión y la sugerencia. Tomo nota de lo del `Array.from()` para incluirlo en la refactorización final y garantizar la consistencia del código. Quedo atento a cualquier otra observación."
+
+---
+
+## 7. Cambios y Cierre de Versión (v0.2)
+
+Como parte del ciclo de mejora continua y tras la revisión del par, se documentan los cambios realizados para la entrega final del motor analítico:
+
+1.  **Creación del archivo `RENDIMIENTO.md`:** Se documentó la tabla de complejidad algorítmica (Tiempo y Espacio) para todas las funciones del motor, las proyecciones a 1 millón de datos, la matriz de riesgos y el plan de optimización.
+2.  **Integración de los MiniRetos 6 y 7:** Se añadieron las funciones de diagnóstico (`clientesRecurrentes`) y las dos versiones de suma por ciudad (`totalCiudadCadena` y `totalCiudadUnPasada`).
+3.  **Aplicación de la revisión del compañero:** Se acogió la recomendación técnica del revisor. Para la solución del Mini Reto 6, se implementó el uso de `Set` para eliminar los ciclos anidados (reduciendo la complejidad de \(O(n^2)\) a \(O(n)\)) y se añadió el método `Array.from()` para garantizar que la función siga devolviendo un Arreglo (Array) y no un Conjunto (Set), manteniendo así el contrato original del código.
+
+### Código Propuesto (Solución Final Optimizada - Mini Reto 6)
+
+Este es el código que se implementará en producción para reemplazar la función original del compañero, solucionando el problema de rendimiento diagnosticado:
+
+```javascript
+
+function clientesRecurrentesOptimizado(ventas) {
+    const vistos = new Set();      
+    const recurrentes = new Set(); 
+
+    // Un solo recorrido O(n)
+    for (let i = 0; i < ventas.length; i++) {
+        const clienteActual = ventas[i].cliente;
+        
+        if (vistos.has(clienteActual)) {
+            recurrentes.add(clienteActual); 
+        } else {
+            vistos.add(clienteActual);     
+        }
+    }
+    
+    // Incorporación sugerida por el compañero:   
+    // Convertimos el Set de vuelta a un Arreglo para no romper el tipo de dato esperado.//
+    return Array.from(recurrentes); 
+}
+

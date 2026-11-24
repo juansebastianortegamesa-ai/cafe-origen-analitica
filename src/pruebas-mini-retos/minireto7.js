@@ -41,7 +41,7 @@ const ciudadPrueba = "Medellín";
 console.log(`Ciudad a buscar: "${ciudadPrueba}"\n`);
 separadoruno();
 
-// Medimos y ejecutamos la versión Cadena
+//la versión Cadena
 separadoruno();
 console.time("Tiempo totalCiudadCadena");
 const resultadoCadena = totalCiudadCadena(ventas10k, ciudadPrueba);
@@ -49,7 +49,7 @@ console.timeEnd("Tiempo totalCiudadCadena");
 separadoruno();
 
 
-// Medimos y ejecutamos la versión Un Pasada
+// la versión Un Pasada
 separadoruno();
 
 console.time("Tiempo totalCiudadUnPasada");

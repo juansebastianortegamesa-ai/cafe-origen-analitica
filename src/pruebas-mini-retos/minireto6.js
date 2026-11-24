@@ -1,4 +1,4 @@
-const ventasDia1 = require("./datos"); // Importamos tus 12 registros
+const ventasDia1 = require("./datos"); 
 
 function clientesRecurrentes(ventas) {
 
