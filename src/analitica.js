@@ -309,6 +309,139 @@ function primeraVenta(ventas, contador) {
 }
 
 
+
+
+// mini reto 10 dia 3 //
+
+//catalogo por fuerza bruta//
+const catalogo = require("./catalogo"); 
+
+function comboRegaloFuerzaBruta(catalogo, valor) {
+    for (let i = 0; i < catalogo.length; i++) {
+        
+      
+        for (let j = i + 1; j < catalogo.length; j++) {
+            
+            
+            if (catalogo[i].precio + catalogo[j].precio === valor) {
+               
+                return [catalogo[i], catalogo[j]];
+            }
+        }
+    }
+    return null;
+}
+
+
+
+//catalogo optimizado //
+function comboRegaloOptimizado(catalogo, valor) {
+   
+    const preciosVistos = new Map();
+
+    for (let i = 0; i < catalogo.length; i++) {
+        const productoActual = catalogo[i];
+        const precioActual = productoActual.precio;
+        
+      
+        const complemento = valor - precioActual;
+
+       
+        if (preciosVistos.has(complemento)) {
+          
+            const productoComplemento = preciosVistos.get(complemento);
+          return [productoComplemento, productoActual];
+        }
+
+        
+        preciosVistos.set(precioActual, productoActual);
+    }
+
+    return null; 
+
+
+}
+
+
+// productoEstrellaPorCiudad//
+
+function productoEstrellaPorCiudad(ventas) {
+    // Map principal: Ciudad -> Map(Producto -> Frecuencia)
+    const conteoCiudades = new Map();
+
+    
+    for (const venta of ventas) {
+        const ciudad = venta.ciudad.toLowerCase().trim(); // Normalizamos
+        const producto = venta.producto;
+
+        
+        if (!conteoCiudades.has(ciudad)) {
+            conteoCiudades.set(ciudad, new Map());
+        }
+
+        
+        const productosDeLaCiudad = conteoCiudades.get(ciudad);
+
+        const conteoActual = productosDeLaCiudad.get(producto) || 0;
+        productosDeLaCiudad.set(producto, conteoActual + 1);
+    }
+
+    
+    const resultado = {};
+
+    for (const [ciudad, productosMap] of conteoCiudades.entries()) {
+        let productoEstrella = null;
+        let maxFrecuencia = 0;
+
+       
+        for (const [producto, frecuencia] of productosMap.entries()) {
+            if (frecuencia > maxFrecuencia) {
+                maxFrecuencia = frecuencia;
+                productoEstrella = producto;
+            }
+        }
+
+        resultado[ciudad] = productoEstrella;
+    }
+
+    return resultado;
+}
+
+
+// primerClienteUnico ///
+
+function primerClienteUnico(ventas) {
+ 
+    const frecuenciaProductos = new Map();
+
+    for (const venta of ventas) {
+        const producto = venta.producto;
+        const conteoActual = frecuenciaProductos.get(producto) || 0;
+        frecuenciaProductos.set(producto, conteoActual + 1);
+    }
+
+   
+    for (const venta of ventas) {
+        const producto = venta.producto;
+        
+       
+        if (frecuenciaProductos.get(producto) === 1) {
+           
+            return venta.cliente; 
+        }
+    }
+
+    // Si ningún producto es único, devolvemos null.
+    return null;
+}
+
+
+
+
+
+
+
+
 //  EXPORTACIÓN DE MÓDULOS//
 module.exports = {
     separadoruno,
@@ -329,7 +462,11 @@ module.exports = {
     totalVendidoMedido,
     ventaMayorMedido,
     totalPorCiudadMedido,
-    primeraVenta
+    primeraVenta,
+    comboRegaloFuerzaBruta,
+    comboRegaloOptimizado,
+    productoEstrellaPorCiudad,
+    primerClienteUnico
 };
 
 
