@@ -1,7 +1,5 @@
-const { mejorSemanaBruta, mejorSemana, parMasCercano } = require('../analitica');
-const catalogo = require('../catalogo');
-
-// Datos exactos de Septiembre
+const { mejorSemanaBruta, mejorSemana, parMasCercano } = require("../analitica");
+const catalogo = require("../catalogo");
 
 const ventasDiarias = [
     320, 410, 280, 390, 510, 620, 700, 300, 290, 450,
@@ -9,56 +7,46 @@ const ventasDiarias = [
     710, 380, 360, 440, 500, 590, 650, 720, 400, 370
 ];
 
-console.log("--- VERIFICACION CON DATOS DE SEPTIEMBRE (k=7) ---");
+// Pruebas de mejorSemana con datos de septiembre
+console.log("PRUEBAS MEJOR SEMANA (SEPTIEMBRE, k=7)");
 const resBruta = mejorSemanaBruta(ventasDiarias, 7);
 const resVentana = mejorSemana(ventasDiarias, 7);
 
-console.log("Resultado Fuerza Bruta: ", resBruta);
-console.log("Resultado Ventana Deslizante: ", resVentana);
+console.log("Fuerza Bruta:", resBruta);
+console.log("Ventana Deslizante:", resVentana);
+console.log("Dia de inicio de la mejor semana:", resVentana.mejorInicio + 1);
+console.log("Coinciden:", resBruta.maxTotal === resVentana.maxTotal && resBruta.mejorInicio === resVentana.mejorInicio ? "SI" : "NO");
 
-// Comprobación estricta de igualdad
-const coinciden = resBruta.maxTotal === resVentana.maxTotal && resBruta.mejorInicio === resVentana.mejorInicio;
-console.log(`Verificacion: Ambas versiones coinciden? ${coinciden ? 'SI' : 'NO'}`);
+// Casos borde de mejorSemana
+console.log("\nCASOS BORDE MEJOR SEMANA");
+console.log("1. k mayor que numero de dias (k=35):", mejorSemana(ventasDiarias, 35));
+console.log("2. Arreglo vacio:", mejorSemana([], 7));
 
-
-// =====================================================================
-// INSTRUCCIÓN 4: Verificación con 100,000 días generados al azar
-// =====================================================================
-console.log("\n--- BENCHMARKING CON 100,000 DIAS ALEATORIOS (k=7) ---");
-
-// Generador de datos masivos simulando ventas entre 100 y 1000
+// Benchmarking con 100,000 dias aleatorios
+console.log("\nBENCHMARKING 100,000 DIAS ALEATORIOS (k=7)");
 const diasAleatorios = Array.from({ length: 100000 }, () => Math.floor(Math.random() * 900) + 100);
 
-// Medición Fuerza Bruta
-console.time("Tiempo Fuerza Bruta");
+console.time("Fuerza Bruta (100,000 dias)");
 const bruta100k = mejorSemanaBruta(diasAleatorios, 7);
-console.timeEnd("Tiempo Fuerza Bruta");
+console.timeEnd("Fuerza Bruta (100,000 dias)");
 
-// Medición Ventana Deslizante
-console.time("Tiempo Ventana Deslizante");
+console.time("Ventana Deslizante (100,000 dias)");
 const ventana100k = mejorSemana(diasAleatorios, 7);
-console.timeEnd("Tiempo Ventana Deslizante");
+console.timeEnd("Ventana Deslizante (100,000 dias)");
 
-console.log(`Verificacion 100k: Coinciden? ${bruta100k.maxTotal === ventana100k.maxTotal ? 'SI' : 'NO'}`);
+console.log("Coinciden en 100,000 dias:", bruta100k.maxTotal === ventana100k.maxTotal && bruta100k.mejorInicio === ventana100k.mejorInicio ? "SI" : "NO");
 
-
-// =====================================================================
-// INSTRUCCIÓN 6: Pruebas de Presupuesto
-// =====================================================================
-console.log("\n--- PRUEBAS DE PRESUPUESTO (parMasCercano) ---");
+// Pruebas de parMasCercano
+console.log("\nPRUEBAS PAR MAS CERCANO");
 const presupuestos = [100000, 140000, 40000];
 
-presupuestos.forEach(presupuesto => {
-    console.log(`\nBuscando mejor par para presupuesto: $${presupuesto}`);
+for (const presupuesto of presupuestos) {
     const resultado = parMasCercano(catalogo, presupuesto);
-    
     if (resultado) {
-        const sumaTotal = resultado[0].precio + resultado[1].precio;
-        console.log(`  Par seleccionado: ${resultado[0].producto} ($${resultado[0].precio}) + ${resultado[1].producto} ($${resultado[1].precio})`);
-        console.log(`  Suma Total: $${sumaTotal} (Dentro del presupuesto)`);
+        const suma = resultado[0].precio + resultado[1].precio;
+        console.log(`Presupuesto $${presupuesto}: ${resultado[0].producto} ($${resultado[0].precio}) + ${resultado[1].producto} ($${resultado[1].precio}) = $${suma}`);
     } else {
-        // Caso borde: presupuesto insuficiente
-        console.log("  Resultado: null (No existe combinacion posible sin superar el presupuesto)");
+        console.log(`Presupuesto $${presupuesto}: null (presupuesto insuficiente)`);
     }
-});
-
+}
+console.log("Caso borde arreglo vacio:", parMasCercano([], 100000));

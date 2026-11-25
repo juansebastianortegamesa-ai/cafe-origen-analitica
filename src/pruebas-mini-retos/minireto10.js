@@ -1,38 +1,36 @@
-// src/minireto10.js
 const ventas = require("../datos");
 const catalogo = require("../catalogo");
 const analitica = require("../analitica");
 
-const { separadordos } = require("../analitica")
+// Pruebas de comboRegalo
+console.log("PRUEBAS COMBO DE REGALO");
+console.log("1. Valor 87,000 (Fuerza Bruta):", analitica.comboRegaloFuerzaBruta(catalogo, 87000));
+console.log("2. Valor 87,000 (Optimizado):", analitica.comboRegalo(catalogo, 87000));
+console.log("3. Valor 61,000 (Fuerza Bruta):", analitica.comboRegaloFuerzaBruta(catalogo, 61000));
+console.log("4. Valor 61,000 (Optimizado):", analitica.comboRegalo(catalogo, 61000));
+console.log("5. Caso borde sin combinacion (50,000):", analitica.comboRegalo(catalogo, 50000));
+console.log("6. Caso borde arreglo vacio:", analitica.comboRegalo([], 87000));
 
-separadordos();
-console.log("PRUEBAS MINI RETO 10");
-separadordos();
+// Pruebas de productoEstrellaPorCiudad
+console.log("\nPRUEBAS PRODUCTO ESTRELLA POR CIUDAD");
+console.log("1. Datos Dia 1:", analitica.productoEstrellaPorCiudad(ventas));
 
-//  PRUEBAS PASO 4: COMBOS DE REGALO //
-console.log("\n--- PRUEBAS COMBOS DE REGALO ---");
+const ventasEmpate = [
+    { ciudad: "Medellin", producto: "Origen Huila 500 g" },
+    { ciudad: "Medellin", producto: "Prensa francesa" }
+];
+console.log("2. Caso borde empate (conserva primero encontrado):", analitica.productoEstrellaPorCiudad(ventasEmpate));
+console.log("3. Caso borde arreglo vacio:", analitica.productoEstrellaPorCiudad([]));
 
-console.log("\n1. Buscando combo de 87,000 (Fuerza Bruta):");
-console.table(analitica.comboRegaloFuerzaBruta(catalogo, 87000));
+// Pruebas de primerClienteUnico
+console.log("\nPRUEBAS PRIMER CLIENTE UNICO");
+console.log("1. Datos Dia 1 (esperado C04):", analitica.primerClienteUnico(ventas));
 
-console.log("\n2. Buscando combo de 87,000 (Optimizado):");
-console.table(analitica.comboRegaloOptimizado(catalogo, 87000));
-
-console.log("\n3. Buscando combo de 61,000 (Fuerza Bruta):");
-console.table(analitica.comboRegaloFuerzaBruta(catalogo, 61000));
-
-console.log("\n4. Buscando combo de 61,000 (Optimizado):");
-console.table(analitica.comboRegaloOptimizado(catalogo, 61000));
-
-//  PRUEBAS PASO 5: PRODUCTO ESTRELLA POR CIUDAD //
-separadordos();
-console.log("\n--- PRODUCTO ESTRELLA POR CIUDAD ---");
-const estrellas = analitica.productoEstrellaPorCiudad(ventas);
-console.table(estrellas);
-
-//  PRUEBAS PASO 6: PRIMER CLIENTE ÚNICO //
-separadordos();
-console.log("\n--- PRIMER CLIENTE ÚNICO ---");
-const clienteUnico = analitica.primerClienteUnico(ventas);
-console.log(`El primer cliente que compró un producto que solo se vendió una vez es: ${clienteUnico}`);
-separadordos();
+const ventasTodosRepetidos = [
+    { cliente: "C01" },
+    { cliente: "C02" },
+    { cliente: "C01" },
+    { cliente: "C02" }
+];
+console.log("2. Caso borde sin cliente unico:", analitica.primerClienteUnico(ventasTodosRepetidos));
+console.log("3. Caso borde arreglo vacio:", analitica.primerClienteUnico([]));

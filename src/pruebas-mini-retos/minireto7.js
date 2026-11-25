@@ -38,7 +38,7 @@ separadoruno();
 console.log("10,000 ventas aleatorias");
 const ventas10k = generadordeVentas(10000);
 const ciudadPrueba = "Medellín";
-console.log(`Ciudad a buscar: "${ciudadPrueba}"\n`);
+console.log(`Ciudad a buscar: "${ciudadPrueba}"`);
 separadoruno();
 
 //la versión Cadena

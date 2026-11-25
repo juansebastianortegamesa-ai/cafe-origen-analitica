@@ -1,42 +1,36 @@
 const ventas = require("./datos");
+const listaProductos = ventas.map(venta => venta.producto.trim());
+const listaCiudades = ventas.map(venta => venta.ciudad.trim().toLowerCase());
 
-// Normalizamos ciudades para evitar duplicados como "medellín" y "Medellín"
-const normalizarTexto = (texto) => {
-    const limpio = texto.trim().toLowerCase();
-    return limpio.charAt(0).toUpperCase() + limpio.slice(1);
-};
-
-const productosUnicos = [...new Set(ventas.map(v => v.producto.trim()))];
-const ciudadesUnicas = [...new Set(ventas.map(v => normalizarTexto(v.ciudad)))];
+const productosUnicos = [...new Set(listaProductos)];
+const ciudadesUnicas = [...new Set(listaCiudades)].map(ciudad => ciudad.charAt(0).toUpperCase() + ciudad.slice(1));
+const preciosPorProducto = new Map(ventas.map(venta => [venta.producto, venta.precio]));
 
 function generadordeVentas(n) {
-    const ventasAL = [];
-    // Escalamos el pool de clientes según n para que existan tanto recurrentes como únicos
-    const totalClientesPosibles = Math.max(10, Math.floor(n * 0.6));
+    let ventasAL = [];
+    const totalClientes = Math.max(8, Math.floor(n * 0.7));
 
     for (let i = 0; i < n; i++) {
-        const indiceProducto = Math.floor(Math.random() * productosUnicos.length);
-        const indiceCiudad = Math.floor(Math.random() * ciudadesUnicas.length);
+        let indiceProducto = Math.floor(Math.random() * productosUnicos.length);
+        let indiceCiudad = Math.floor(Math.random() * ciudadesUnicas.length);
+        let productoSeleccionado = productosUnicos[indiceProducto];
 
-        // Genera un día aleatorio entre 1 y 30 en formato "2026-09-DD"
-        const diaAleatorio = String(Math.floor(Math.random() * 30) + 1).padStart(2, "0");
-        
-        // Genera códigos de cliente dinámicos (ej. C001, C045...)
-        const numeroCliente = Math.floor(Math.random() * totalClientesPosibles) + 1;
-        const clienteFormateado = `C${String(numeroCliente).padStart(2, "0")}`;
+        let cantidadAleatoria = Math.floor(Math.random() * 5) + 1;
+        let precioAleatorio = preciosPorProducto.get(productoSeleccionado);
+        let diaAleatorio = String(Math.floor(Math.random() * 30) + 1).padStart(2, "0");
+        let numeroCliente = Math.floor(Math.random() * totalClientes) + 1;
 
-        const cantidadAleatoria = Math.floor(Math.random() * 5) + 1;
-        const precioAleatorio = Math.floor(Math.random() * 10) * 10000 + 26000;
-
-        ventasAL.push({
+        let nuevaVenta = {
             id: i + 1,
             fecha: `2026-09-${diaAleatorio}`,
-            cliente: clienteFormateado,
-            producto: productosUnicos[indiceProducto],
+            cliente: `C${String(numeroCliente).padStart(2, "0")}`,
+            producto: productoSeleccionado,
             ciudad: ciudadesUnicas[indiceCiudad],
             cantidad: cantidadAleatoria,
             precio: precioAleatorio
-        });
+        };
+
+        ventasAL.push(nuevaVenta);
     }
 
     return ventasAL;
