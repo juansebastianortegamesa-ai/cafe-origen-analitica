@@ -17,7 +17,7 @@ La versión `v1.0` reemplaza las búsquedas cuadráticas iniciales ($O(n^2)$) po
 
 1. **Clonar el repositorio e ingresar a la carpeta del proyecto:**
    ```bash
-   git clone <url-del-repositorio>
+   git clone https://github.com/juansebastianortegamesa-ai/cafe-origen-analitica.git
    cd cafe-origen-analitica
    ```
 
