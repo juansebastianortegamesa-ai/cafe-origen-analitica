@@ -793,20 +793,104 @@ Los criterios exigen que las tres funciones sean O(n). Aquí la justificación t
 
 --------------------------------------------------------------------
 
+## MINI RETO 9: Optimización con Set y Map, y Análisis de Trade-off
+
+### 1. Método de resolución (6 fases)
+1. **Entender el problema:**
+   * **Entradas:** Arreglo `ventas` de objetos con propiedad `cliente`.
+   * **Salidas:** Arreglo de clientes que aparecen 2 o más veces (`clientesRecurrentesSet`), y un `Map` con el conteo de compras por cliente (`comprasPorCliente`).
+   * **Restricciones:** Procesar 100.000 ventas en menos de 1 segundo (`< 1,000 ms`).
+2. **Ejemplos y casos borde:**
+   * Datos del Día 1 (12 ventas) $\rightarrow$ `['C01', 'C02', 'C03']`.
+   * Arreglo vacío `[]` $\rightarrow$ `[]`.
+   * Todos los clientes únicos `['C01', 'C02', 'C03']` $\rightarrow$ `[]`.
+   * Cliente repetido 3 o más veces $\rightarrow$ aparece una sola vez en la salida.
+3. **Fuerza bruta y complejidad:** La versión original compara cada venta contra las siguientes mediante dos bucles `for` anidados ($O(n^2)$) y verifica duplicados con `.includes()` ($O(n)$), alcanzando $O(n^3)$ en el peor caso (`36,508 ms` para `100,000` ventas).
+4. **Idea de optimización:** Reemplazar las búsquedas lineales por consultas en tiempo constante $O(1)$: dos `Set` (`vistos` y `recurrentes`) en un único recorrido (`clientesRecurrentesSet`), y un `Map` de frecuencias por cliente (`comprasPorCliente`).
+5. **Implementación y verificación:** Se verificó con resultados ordenados que la versión original, `clientesRecurrentesSet` y `comprasPorCliente` devuelven exactamente los mismos clientes en los datos del Día 1 (`[C01, C02, C03]`), en `5,000` ventas generadas, en arreglo vacío (`[]`) y cuando todos los clientes son únicos (`[]`).
+6. **Medición y análisis:** Se cronometraron las tres versiones con `console.time` para `1,000`, `10,000` y `100,000` ventas.
+
+### 2. Tabla de medición de tiempos reales (`src/pruebas-mini-retos/minireto9.js`)
+
+| Tamaño ($n$) | Original $O(n^2)$ | `clientesRecurrentesSet` $O(n)$ | `comprasPorCliente` (`Map`) $O(n)$ | Clientes distintos (`Map.size`) |
+| :--- | :--- | :--- | :--- | :--- |
+| 1,000 ventas | 4.922 ms | 0.131 ms | 0.350 ms | 526 |
+| 10,000 ventas | 315.039 ms | 1.264 ms | 1.475 ms | 5,363 |
+| 100,000 ventas | ~36,508 ms (MiniReto 6) | 11.748 ms | 21.284 ms | 53,182 |
+
+### 3. Intercambio entre tiempo y memoria (Trade-off)
+* **Ganancia en tiempo:** Se reduce la complejidad temporal de cuadrática $O(n^2)$ a lineal $O(n)$, bajando el tiempo de ejecución para `100,000` ventas de ~36.5 segundos a **11.748 ms** con `Set` y **21.284 ms** con `Map` (cumpliendo el límite de `< 1,000 ms`).
+* **Costo en memoria $O(n)$:** Tanto `clientesRecurrentesSet` (dos `Set`) como `comprasPorCliente` (un `Map`) almacenan hasta $n$ claves en memoria RAM cuando todos los clientes son distintos, lo que representa una complejidad espacial **$O(n)$**.
+
+---
+
+## MINI RETO 10: Estructuras Clave-Valor y Optimización de Búsquedas
+
+### 1. Resolución de Combos (Fuerza Bruta vs Map)
+* **Fuerza Bruta (`comboRegaloFuerzaBruta`):** Usa dos bucles `for` anidados para comparar cada producto con todos los demás. Complejidad Temporal: **$O(n^2)$**. Complejidad Espacial: **$O(1)$**.
+* **Optimizado (`comboRegalo`):** Usa un `Map` para guardar los precios vistos y calcular el complemento (`valor - precioActual`) en una sola pasada. La búsqueda en el `Map` es $O(1)$. Complejidad Temporal: **$O(n)$**. Complejidad Espacial: **$O(n)$** (por el `Map` creado).
+
+#### Traza del Combo Optimizado (Buscando 87,000)
+1. Revisa `Origen Nariño 250 g` (`26,000`). Complemento: `61,000`. No está en el `Map`. Lo guarda.
+2. Revisa `Origen Huila 500 g` (`42,000`). Complemento: `45,000`. No está en el `Map`. Lo guarda.
+3. Revisa `Origen Sierra 500 g` (`45,000`). Complemento: **`42,000`**. **¡Está en el `Map`!** Retorna `[Origen Huila 500 g, Origen Sierra 500 g]`.
+
+#### Resultados reales de ejecución (`src/pruebas-mini-retos/minireto10.js`)
+* **Valor `87,000` (Fuerza Bruta y Optimizado):** `Origen Huila 500 g ($42,000) + Origen Sierra 500 g ($45,000)`.
+* **Valor `61,000` (Fuerza Bruta y Optimizado):** `Origen Nariño 250 g ($26,000) + Taza de cerámica ($35,000)`.
+* **Valor `50,000` (sin combinación posible):** `null`.
+* **Catálogo vacío `[]`:** `null`.
+
+### 2. Regla de Desempate en `productoEstrellaPorCiudad`
+Cuando dos o más productos tienen exactamente la misma cantidad de ventas (frecuencia) en una ciudad, el algoritmo implementado resuelve el empate **quedándose con el primer producto que encontró en el orden de inserción del `Map`**.
+Esto ocurre porque la condición de actualización es estrictamente mayor (`if (frecuencia > maxFrecuencia)`). Si la frecuencia es igual, el algoritmo no actualiza la variable y mantiene el primer producto que alcanzó ese máximo.
+
+* **Resultado real en Datos del Día 1:** `{ Medellín: 'Origen Huila 500 g', Bogotá: 'Origen Nariño 250 g', Cali: 'Prensa francesa', Pereira: 'Origen Huila 500 g' }`.
+* **Caso borde empate:** Conserva el primero encontrado (`{ Medellin: 'Origen Huila 500 g' }`).
+* **Caso borde arreglo vacío `[]`:** `{}`.
+
+### 3. Primer Cliente Único (`primerClienteUnico`)
+El objetivo es encontrar al primer cliente en orden de ventas que **solo aparezca una vez en todo el historial**.
+* **Corrección lógica:** Inicialmente se contaron los productos, pero al revisar los requisitos del reto, se ajustó la lógica para contar las frecuencias de los **clientes**.
+* Al recorrer los datos del Día 1, el cliente **`C04`** (ID 5) es el primero que tiene una frecuencia global igual a `1`. Por ende, el algoritmo devuelve correctamente `C04`.
+* **Casos borde probados:** Sin cliente único devuelve `null`; arreglo vacío `[]` devuelve `null`.
+
+### 4. Justificación de Complejidad Algorítmica (Big O)
+Los criterios exigen que las tres funciones sean $O(n)$. Aquí la justificación técnica:
+
+* **`comboRegalo` (Tiempo: $O(n)$ / Espacio: $O(n)$):**
+  * *Justificación:* Utiliza un solo bucle `for` para recorrer el catálogo una única vez. La búsqueda del complemento en el `Map` se hace en tiempo constante $O(1)$. El espacio es $O(n)$ porque en el peor de los casos (no hay combinación) guardaremos todos los productos en el `Map`.
+* **`productoEstrellaPorCiudad` (Tiempo: $O(n)$ / Espacio: $O(n)$):**
+  * *Justificación:* Recorre el arreglo de ventas una sola vez para llenar un `Map` anidado (`Ciudad -> Producto -> Frecuencia`). Luego, recorre los `Map` creados, cuyo tamaño total está acotado por $n$. Por lo tanto, el tiempo crece linealmente con la cantidad de ventas.
+* **`primerClienteUnico` (Tiempo: $O(n)$ / Espacio: $O(n)$):**
+  * *Justificación:* Utiliza dos recorridos secuenciales (no anidados) sobre el arreglo de ventas. El primero llena un `Map` de frecuencias ($O(n)$), y el segundo busca en el `Map` en tiempo $O(1)$ por cada venta ($O(n)$). En notación Big O, $O(n) + O(n)$ se simplifica a **$O(n)$**.
+
+### 5. Casos Borde Probados
+* **Sin solución:** Si no hay combinación para el combo (`50,000`), devuelve `null`.
+* **Empates:** Documentado en el punto 2 (conserva el primero encontrado).
+* **Arreglo vacío:** Si las ventas están vacías (`[]`), devuelve `{}` en `productoEstrellaPorCiudad` y `null` en `comboRegalo` y `primerClienteUnico` sin romperse.
+
+---
+
 ## MINI RETO 11: La mejor racha y el presupuesto exacto
 
-### 1. Traza Manual de las Primeras Posiciones (Ventana Deslizante, k=7)
+### 1. Traza Manual de las Primeras Posiciones (Ventana Deslizante, $k = 7$)
 Para comprender el funcionamiento del algoritmo, se analiza el arreglo de ventas diarias de septiembre. La ventana deslizante optimiza el cálculo al no sumar los 7 días desde cero en cada iteración, sino reutilizando la suma anterior.
 
 Arreglo base: `[320, 410, 280, 390, 510, 620, 700, 300, 290, ...]`
 
 | Posición | Días (Índices) | Operación Matemática (Fórmula de Ventana) | Suma Total |
 | :--- | :--- | :--- | :--- |
-| 1 | 0 al 6 | Suma inicial iterativa: 320 + 410 + 280 + 390 + 510 + 620 + 700 | **3230** |
-| 2 | 1 al 7 | 3230 - 320 (día 0 que sale) + 300 (día 7 que entra) | **3210** |
-| 3 | 2 al 8 | 3210 - 410 (día 1 que sale) + 290 (día 8 que entra) | **3090** |
+| 1 | 0 al 6 | Suma inicial iterativa: `320 + 410 + 280 + 390 + 510 + 620 + 700` | **3230** |
+| 2 | 1 al 7 | `3230 - 320 (día 0 que sale) + 300 (día 7 que entra)` | **3210** |
+| 3 | 2 al 8 | `3210 - 410 (día 1 que sale) + 290 (día 8 que entra)` | **3090** |
 
-Tras evaluar todo el arreglo, la ejecución confirmó que la mejor racha ocurre en el índice 23 (inicio de la ventana) con un total de **3670**. Ambas versiones (fuerza bruta y ventana deslizante) arrojaron exactamente el mismo resultado, validando la correcta implementación del algoritmo.
+Tras evaluar todo el arreglo, la ejecución confirmó que la mejor racha ocurre en el **día 24** (índice `23` de inicio de la ventana) con un total de **`3670`** (`$3,670 mil`). Ambas versiones (`mejorSemanaBruta` y `mejorSemana`) arrojaron exactamente el mismo resultado, validando la correcta implementación del algoritmo.
+
+* **Benchmarking real con 100,000 días aleatorios ($k = 7$):**
+  * `mejorSemanaBruta`: **1.560 ms**
+  * `mejorSemana` (Ventana Deslizante): **0.461 ms**
+  * Coincidencia exacta verificada entre ambas versiones (`SI`).
 
 ### 2. Traza de los Punteros (Presupuesto: 100,000)
 Para resolver la búsqueda del par de productos, primero se ordena el catálogo numéricamente por precio de menor a mayor:
@@ -814,26 +898,56 @@ Para resolver la búsqueda del par de productos, primero se ordena el catálogo 
 
 Se utilizan dos punteros: `izquierda` (apunta al más barato) y `derecha` (apunta al más caro).
 
-*   **Paso 1:** Izq = 18,000. Der = 120,000. Suma = **138,000**.
-    *   *Acción:* La suma excede el presupuesto. El puntero `derecha` se mueve a la izquierda para buscar un producto más económico.
-*   **Paso 2:** Izq = 18,000. Der = 95,000. Suma = **113,000**.
-    *   *Acción:* Excede el presupuesto. `derecha` se mueve a la izquierda.
-*   **Paso 3:** Izq = 18,000. Der = 79,000. Suma = **97,000**.
-    *   *Acción:* Es una suma válida (no supera los 100,000). Se registra como el `mejorPar` actual. Como queremos acercarnos más al límite, movemos el puntero `izquierda` a la derecha para intentar sumar un producto de mayor valor.
-*   **Paso 4:** Izq = 26,000. Der = 79,000. Suma = **105,000**.
-    *   *Acción:* Excede el presupuesto. `derecha` se mueve a la izquierda.
-*   **Paso 5:** Izq = 26,000. Der = 45,000. Suma = **71,000**.
-    *   *Acción:* Es válida, pero menor a 97,000. No actualiza el récord. `izquierda` se mueve a la derecha.
-*   **Pasos posteriores:** El algoritmo continúa moviendo los punteros hasta que se cruzan, sin encontrar una suma mayor a 97,000 que no supere el presupuesto.
+* **Paso 1:** Izq = 18,000. Der = 120,000. Suma = **138,000**.
+  * *Acción:* La suma excede el presupuesto. El puntero `derecha` se mueve a la izquierda para buscar un producto más económico.
+* **Paso 2:** Izq = 18,000. Der = 95,000. Suma = **113,000**.
+  * *Acción:* Excede el presupuesto. `derecha` se mueve a la izquierda.
+* **Paso 3:** Izq = 18,000. Der = 79,000. Suma = **97,000**.
+  * *Acción:* Es una suma válida (no supera los 100,000). Se registra como el `mejorPar` actual. Como queremos acercarnos más al límite, movemos el puntero `izquierda` a la derecha para intentar sumar un producto de mayor valor.
+* **Paso 4:** Izq = 26,000. Der = 79,000. Suma = **105,000**.
+  * *Acción:* Excede el presupuesto. `derecha` se mueve a la izquierda.
+* **Paso 5:** Izq = 26,000. Der = 45,000. Suma = **71,000**.
+  * *Acción:* Es válida, pero menor a 97,000. No actualiza el récord. `izquierda` se mueve a la derecha.
+* **Pasos posteriores:** El algoritmo continúa moviendo los punteros hasta que se cruzan, sin encontrar una suma mayor a 97,000 que no supere el presupuesto.
 
-**Resultado final confirmado:** Filtros de papel ($18,000) + Origen Huila 1 kg ($79,000) = **$97,000**.
+**Resultados reales confirmados de `parMasCercano` (`minireto11.js`):**
+* **Presupuesto `100,000`:** `Filtros de papel x100 ($18,000) + Origen Huila 1 kg ($79,000) = $97,000`.
+* **Presupuesto `140,000`:** `Origen Sierra 500 g ($45,000) + Prensa francesa ($95,000) = $140,000` (exacto).
+* **Presupuesto `40,000`:** `null` (presupuesto insuficiente).
+* **Arreglo vacío `[]`:** `null`.
 
 ### 3. Justificación de Complejidad Algorítmica (Big O)
-*   **`mejorSemana` es O(n) en tiempo y O(1) en espacio:** Utiliza un único bucle `for` que recorre el arreglo de días una sola vez. En cada iteración realiza operaciones aritméticas de tiempo constante. El tiempo de ejecución crece de forma lineal y directamente proporcional al número de días. No crea estructuras de datos auxiliares, por lo que su espacio es constante.
-*   **`parMasCercano` es O(n log n) en tiempo y O(n) en espacio:** Aunque el bucle `while` de los dos punteros es O(n), el cuello de botella es el método `sort()` previo. Los algoritmos de ordenamiento eficientes en JavaScript (como Timsort) tienen una complejidad de O(n log n). Como O(n log n) domina asintóticamente a O(n), la función completa se clasifica como O(n log n). La complejidad espacial es O(n) debido a la creación de una copia del catálogo (usando el operador spread `[...]`) para garantizar la inmutabilidad de los datos originales.
+* **`mejorSemanaBruta` es $O(n \cdot k)$ en tiempo y $O(1)$ en espacio:** Recalcula desde cero la suma de los $k$ días en cada desplazamiento de la ventana.
+* **`mejorSemana` es $O(n)$ en tiempo y $O(1)$ en espacio:** Utiliza un único bucle `for` que recorre el arreglo de días una sola vez. En cada iteración realiza operaciones aritméticas de tiempo constante. El tiempo de ejecución crece de forma lineal y directamente proporcional al número de días. No crea estructuras de datos auxiliares, por lo que su espacio es constante.
+* **`parMasCercano` es $O(n \log n)$ en tiempo y $O(n)$ en espacio:** Aunque el bucle `while` de los dos punteros es $O(n)$, el cuello de botella es el método `sort()` previo. Los algoritmos de ordenamiento eficientes en JavaScript (como Timsort) tienen una complejidad de $O(n \log n)$. Como $O(n \log n)$ domina asintóticamente a $O(n)$, la función completa se clasifica como $O(n \log n)$. La complejidad espacial es $O(n)$ debido a la creación de una copia del catálogo (usando el operador spread `[...]`) para garantizar la inmutabilidad de los datos originales.
 
 ### 4. Casos Borde Validados
-*   **Ventana mayor a los datos (`k > dias.length`):** La función retorna `null` de forma segura, evitando errores de desbordamiento de índices o cálculos incorrectos.
-*   **Presupuesto insuficiente:** Si el presupuesto es menor a la suma de los dos productos más baratos (ej. $40,000), los punteros se cruzan sin encontrar ninguna suma válida. La función retorna `null`, cumpliendo con el requisito de no superar nunca el presupuesto.
----------------------------------------------
+* **Ventana mayor a los datos ($k > \text{dias.length}$, ej. $k = 35$) y arreglo vacío `[]`:** La función retorna `null` de forma segura, evitando errores de desbordamiento de índices o cálculos incorrectos.
+* **Presupuesto insuficiente (`40,000`) y arreglo vacío `[]`:** Si el presupuesto es menor a la suma de los dos productos más baratos, los punteros se cruzan sin encontrar ninguna suma válida. La función retorna `null`, cumpliendo con el requisito de no superar nunca el presupuesto.
 
+---
+
+## MINI RETO 12: Analítica Café Origen `v1.0` (Lanzamiento)
+
+### 1. Mediciones reales del reporte final (`src/reporte.js`)
+Al integrar todas las funciones optimizadas en `src/reporte.js` con soporte CLI (`process.argv`), se obtuvieron los siguientes tiempos reales de ejecución completa:
+* **Día 1 Real (12 registros):** `17.00 ms`
+* **Datos generados (`10,000` registros):** `23.97 ms` (frente a `286.00 ms` en la `v0.1` — **11.9x más rápido**)
+* **Datos generados (`100,000` registros):** `73.99 ms` (cumple ampliamente el criterio de ejecutarse en menos de `5,000 ms`)
+
+### 2. Resumen de construcción y estrategia de resolución (MiniRetos 1 al 12)
+
+| MiniReto | Qué se construyó | Estrategia de resolución y optimización aplicada |
+| :--- | :--- | :--- |
+| **1** | Exploración inicial de `src/datos.js` (`explorar.js`). | Inspección directa de propiedades y acceso por índice en $O(1)$. |
+| **2** | Diccionario de datos, casos borde e indicadores imperativos (`totalVendido`, `unidadesVendidas`, `ventaMayor`, `ticketPromedio`, `ventasPorCiudad`). | Acumuladores y contadores en un solo recorrido $O(n)$ con validaciones de arreglo vacío y normalización de texto. |
+| **3** | Refactorización declarativa (`totalVendidoM`, `unidadesVendidasM`, `ventasPorCiudadM`, `totalPorCiudad`, `unidadesPorProducto`, `topProductosPorValor`, `ventasDelDia`). | Encadenamiento declarativo con `.filter()`, `.map()`, `.reduce()` y copias inmutables `[...arr].sort()` ($O(n)$ y $O(n \log n)$). |
+| **4** | Registro de depuración y pruebas de casos borde (`minireto2-3-4.js`). | Reproducción controlada de fallos (`undefined`, `NaN`) y valores iniciales seguros en `reduce`. |
+| **5** | Generador de datos (`src/generador.js`) e instrumentación de operaciones (`src/medir.js`). | Conteo empírico de operaciones para contrastar complejidad constante $O(1)$ frente a lineal $O(n)$. |
+| **6** | Diagnóstico de rendimiento de `clientesRecurrentes` (`minireto6.js`). | Trazas manuales y pruebas de duplicación de entrada para demostrar crecimiento cuadrático $O(n^2)$ / $O(n^3)$. |
+| **7** | Comparativa de memoria entre cadena de métodos y pasada única (`minireto7.js`). | Reducción de 4 recorridos y 3 arreglos intermedios ($O(n)$ espacio) a 1 recorrido sin copias ($O(1)$ espacio). |
+| **8** | Documento `RENDIMIENTO.md` (`v0.2`) y revisión por pares. | Matriz de riesgos por complejidad Big O y uso de `Array.from()` para conservar contratos de retorno. |
+| **9** | `clientesRecurrentesSet` y `comprasPorCliente` (`minireto9.js`). | Eliminación de ciclos anidados mediante búsqueda en tiempo constante $O(1)$ con `Set` y `Map` (tiempo $O(n)$, memoria $O(n)$). |
+| **10** | Catálogo (`src/catalogo.js`), `comboRegalo`, `productoEstrellaPorCiudad` y `primerClienteUnico` (`minireto10.js`). | Búsqueda de complemento en una pasada con `Map` ($O(n)$) y conteo de frecuencias en `Map` anidados ($O(n)$). |
+| **11** | `mejorSemanaBruta`, `mejorSemana` y `parMasCercano` (`minireto11.js`). | Ventana deslizante de tamaño fijo ($O(n)$ tiempo, $O(1)$ espacio) y dos punteros sobre arreglo ordenado ($O(n \log n)$). |
+| **12** | Integración final en `src/reporte.js` con soporte CLI (`process.argv`), `README.md` y `RENDIMIENTO.md` `v1.0`. | Unificación de todos los módulos optimizados sin funciones $O(n^2)$, ejecutando `100,000` ventas en `73.99 ms`. |
