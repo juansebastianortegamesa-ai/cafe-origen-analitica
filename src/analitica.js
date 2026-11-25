@@ -90,6 +90,8 @@ const sinVentas =[];
 //tabla de funciones con las entradas//
 //seccion de las entradas con el arreglo completo//
 
+/* // POR MOTIVOS DE ORDEN EN LA TERMINAL Y OTROS COMMITS SE PUSIERON COMO COMENTARIOS, EN LA CARPETA MINI RETOS AHI SE ENCUENTRAN TODOS LOS PRINTS DE ESTA SECCION //
+
 separadordos();
 console.log("pruebas con arreglo completo")
 separadordos();
@@ -156,25 +158,21 @@ separadoruno();
 console.log("ventas por ciudad (vacio):", ventasPorCiudad(sinVentas, "medellín"));
 separadoruno();
 
+*/
 
 
 //mini reto 3 metodos de arreglo//
 //total de ventas M//
-separadordos();
-console.log("metodos de arreglo")
-separadordos();
-
-separadoruno();
 
 function totalVendidoM(ventas) {
     return ventas.reduce((acumulador, venta) => acumulador + valorVenta(venta), 0);
   
 }
-separadoruno();
 
+/*
 console.log("totalVendidoM:", totalVendidoM(ventas));
 separadoruno();
-
+*/
 
 
 //unidadesVendidasM//
@@ -183,11 +181,12 @@ separadoruno();
 function unidadesVendidasM(ventas) {
     return ventas.reduce((acumulador, venta) => acumulador + venta.cantidad, 0);
 }
+/*
 separadoruno();
 
 console.log("unidadesVendidasM:", unidadesVendidasM(ventas));
 separadoruno();
-
+*/
 
 //ventasPorCiudadM//
 function ventasPorCiudadM(ventas, ciudadBuscada) {
@@ -196,9 +195,10 @@ function ventasPorCiudadM(ventas, ciudadBuscada) {
         .reduce((acumulador, ventaFiltrada) => acumulador + valorVenta(ventaFiltrada), 0);
 }
 
+/*
 separadoruno();
 console.log("ventasporciudadM (Medellín):", ventasPorCiudadM(ventas, "Medellín"));
-
+*/
 
 
 // FASE 3: AGRUPACIONES Y RANKINGS
@@ -409,33 +409,143 @@ function productoEstrellaPorCiudad(ventas) {
 
 
 // primerClienteUnico ///
-
 function primerClienteUnico(ventas) {
- 
-    const frecuenciaProductos = new Map();
+  
+    const frecuenciaClientes = new Map();
+
 
     for (const venta of ventas) {
-        const producto = venta.producto;
-        const conteoActual = frecuenciaProductos.get(producto) || 0;
-        frecuenciaProductos.set(producto, conteoActual + 1);
+        const cliente = venta.cliente;
+      
+        const conteoActual = frecuenciaClientes.get(cliente) || 0;
+        frecuenciaClientes.set(cliente, conteoActual + 1);
     }
 
-   
+
     for (const venta of ventas) {
-        const producto = venta.producto;
-        
-       
-        if (frecuenciaProductos.get(producto) === 1) {
-           
+     
+        if (frecuenciaClientes.get(venta.cliente) === 1) {
             return venta.cliente; 
         }
     }
 
-    // Si ningún producto es único, devolvemos null.
     return null;
 }
 
 
+
+
+// mini reto 11 //
+
+// MEJORSEMANABRUTA //
+
+function mejorSemanaBruta(dias, k) {
+
+    if (k > dias.length) return null;
+
+    let maxTotal = 0;
+    let mejorInicio = 0;
+
+   
+    for (let i = 0; i <= dias.length - k; i++) {
+        let sumaActual = 0; 
+        
+      
+        for (let j = i; j < i + k; j++) {
+            sumaActual += dias[j];
+        }
+
+       
+        if (sumaActual > maxTotal) {
+            maxTotal = sumaActual;
+            mejorInicio = i; 
+        }
+    }
+
+    return { maxTotal, mejorInicio };
+}
+
+
+//MEJOR SEMANA //
+
+function mejorSemana(dias, k) {
+    if (k > dias.length) return null;
+
+    let sumaActual = 0;
+    for (let i = 0; i < k; i++) {
+        sumaActual += dias[i];
+    }
+
+   
+    let maxTotal = sumaActual;
+    let mejorInicio = 0;
+
+
+    for (let i = k; i < dias.length; i++) {
+       
+        sumaActual = sumaActual - dias[i - k] + dias[i];
+
+        
+        if (sumaActual > maxTotal) {
+            maxTotal = sumaActual;
+            mejorInicio = i - k + 1; 
+        }
+    }
+
+    return { maxTotal, mejorInicio };
+}
+
+
+//PAR MAS CERCANO //
+function parMasCercano(catalogo, presupuesto) {
+    const productosOrdenados = [...catalogo].sort((a, b) => a.precio - b.precio);
+
+    let izquierda = 0; 
+    let derecha = productosOrdenados.length - 1; 
+
+    let mejorSuma = 0;
+    let mejorPar = null;
+
+    
+    while (izquierda < derecha) {
+        const productoIzq = productosOrdenados[izquierda];
+        const productoDer = productosOrdenados[derecha];
+        const sumaActual = productoIzq.precio + productoDer.precio;
+
+       
+        if (sumaActual <= presupuesto) {
+           
+            if (sumaActual > mejorSuma) {
+                mejorSuma = sumaActual;
+                mejorPar = [productoIzq, productoDer];
+            }
+          
+            izquierda++;
+        } else {
+
+            derecha--;
+        }
+    }
+
+    return mejorPar; 
+}
+
+
+//mini reto 12// 
+
+function clientesRecurrentesOptimizado(ventas) {
+    const vistos = new Set();       
+    const recurrentes = new Set();  
+    for (const venta of ventas) {
+        const clienteActual = venta.cliente; 
+        if (vistos.has(clienteActual)) {
+            recurrentes.add(clienteActual);
+        } else {
+            vistos.add(clienteActual);
+        }
+    }
+    return Array.from(recurrentes);
+}
 
 
 
@@ -466,8 +576,12 @@ module.exports = {
     comboRegaloFuerzaBruta,
     comboRegaloOptimizado,
     productoEstrellaPorCiudad,
-    primerClienteUnico
-};
+    primerClienteUnico,
+    mejorSemana,
+    mejorSemanaBruta,
+    parMasCercano,
+    clientesRecurrentesOptimizado
 
+};
 
 

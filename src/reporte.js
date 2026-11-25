@@ -1,73 +1,94 @@
-const ventas = require("./datos");
-const {
-    separadoruno,
-    separadordos,
-    valorVenta,
-    totalVendido,
-    unidadesVendidas,
-    ventaMayor,
-    ticketPromedio,
-    ventasPorCiudad,
-    totalVendidoM,
-    unidadesVendidasM,
-    ventasPorCiudadM,
-    totalPorCiudad,
-    unidadesPorProducto,
-    topProductosPorValor,
-    ventasDelDia
-} = require("./analitica");
+// src/reporte.js
+const analitica = require("./analitica");
+const ventasReales = require("./datos");
+const { generadordeVentas } = require("./generador");
+const catalogo = require("./catalogo");
 
-// 1. Función para dar formato de moneda colombiana
+// 1. (process.argv)
+const argumento = process.argv[2]; 
+let ventasAProcesar = ventasReales; 
+
+if (argumento) {
+    const cantidad = parseInt(argumento, 10); 
+    if (!isNaN(cantidad) && cantidad > 0) {
+        ventasAProcesar = generadordeVentas(cantidad);
+    }
+}
+
+// Función auxiliar para dar formato de moneda colombiana
 const formatoCOP = (valor) => `$ ${valor.toLocaleString("es-CO")}`;
 
+//  INICIO DE MEDICIÓN DE TIEMPO TOTAL (Requisito: < 5 segundos) //
+const inicioTiempo = performance.now();
 
-// 2. SECCION 1: Resumen General
-console.log("RESUMEN GENERAL");
-separadoruno();
-const totalDinero = totalVendidoM(ventas);
-console.log(`Total vendido en el periodo: ${formatoCOP(totalDinero)}`);
+console.log("==========================================");
+console.log(`REPORTE ANALÍTICA CAFÉ ORIGEN v1.0`);
+console.log(`Fuente: ${argumento ? "Datos generados" : "Día 1 Real"} | Registros: ${ventasAProcesar.length}`);
+console.log("==========================================\n");
 
+// SECCIÓN 1: RESUMEN GENERAL
+console.log("--- RESUMEN GENERAL ---");
+console.log(`Total vendido: ${formatoCOP(analitica.totalVendidoM(ventasAProcesar))}`);
+console.log(`Unidades vendidas: ${analitica.unidadesVendidasM(ventasAProcesar)}`);
 
-
-// SECCION 2: Ventas por Ciudad
-console.log("VENTAS POR CIUDAD");
-separadoruno();
-const ventasCiudades = totalPorCiudad(ventas); 
+// SECCIÓN 2: VENTAS POR CIUDAD
+console.log("\n--- VENTAS POR CIUDAD ---");
+const ventasCiudades = analitica.totalPorCiudad(ventasAProcesar);
 for (const [ciudad, total] of Object.entries(ventasCiudades)) {
     console.log(`${ciudad.padEnd(12)} : ${formatoCOP(total)}`);
 }
 
-// 4. SECCION 3: Unidades por Producto
-console.log("UNIDADES VENDIDAS POR PRODUCTO");
-separadoruno();
-console.table(unidadesPorProducto(ventas));
+// SECCIÓN 3: TOP PRODUCTOS
+console.log("\n--- TOP 3 PRODUCTOS ---");
+const top3 = analitica.topProductosPorValor(ventasAProcesar, 3);
+console.table(top3.map(p => ({ Producto: p.nombre, Valor: formatoCOP(p.valor) })));
 
-// TOP DE LOS PRODUCTOS QUE MAS GANARON //
+// SECCIÓN 4: CLIENTES RECURRENTES (Usando Set O(n))
+console.log("\n--- CLIENTES RECURRENTES ---");
+const recurrentes = analitica.clientesRecurrentesOptimizado(ventasAProcesar);
+console.log(`Cantidad: ${recurrentes.length} | Listado: [${recurrentes.join(", ")}]`);
 
-console.log("TOP 3 PRODUCTOS QUE MAS DINERO GENERARON ");
-separadoruno();
-const top3 = topProductosPorValor(ventas, 3);
+// SECCIÓN 5: PRODUCTO ESTRELLA POR CIUDAD (Usando Map O(n))
+console.log("\n--- PRODUCTO ESTRELLA POR CIUDAD ---");
+console.table(analitica.productoEstrellaPorCiudad(ventasAProcesar));
 
-const top3Formateado = top3.map((producto) => ({
-    Producto: producto.nombre,
-    Valor: formatoCOP(producto.valor) 
-}));
-console.table(top3Formateado);
+// SECCIÓN 6: COMBO DE REGALO SUGERIDO (Usando parMasCercano O(n log n))
+console.log("\n--- COMBO DE REGALO SUGERIDO (Presupuesto $100,000) ---");
+const combo = analitica.parMasCercano(catalogo, 100000); 
+if (combo) {
+    console.log(`Sugerencia: ${combo[0].producto} + ${combo[1].producto} | Total: ${formatoCOP(combo[0].precio + combo[1].precio)}`);
+} else {
+    console.log("No se encontró combinación.");
+}
 
-// Reporte de días (Caso con ventas y caso vacío) //
+// SECCIÓN 7: PRIMER CLIENTE ÚNICO (Usando Map O(n))
+console.log("\n--- PRIMER CLIENTE ÚNICO ---");
+console.log(`Cliente: ${analitica.primerClienteUnico(ventasAProcesar)}`);
 
-console.log("REPORTE DE VENTAS POR DIA");
-separadoruno();
+// SECCIÓN 8: MEJOR RACHA DE 3 DÍAS 
+console.log("\n--- MEJOR RACHA DE 3 DÍAS ---"); 
 
-const diaConVentas = "2026-09-01";
-const reporteDia1 = ventasDelDia(ventas, diaConVentas);
-console.log(`Dia: ${diaConVentas}`);
-console.log(`  Total: ${formatoCOP(reporteDia1.total)} | Unidades: ${reporteDia1.unidades}`);
+// Agrupamos los totales reales por fecha usando un Map
+const totalesPorFecha = new Map();
+for (const venta of ventasAProcesar) {
+    const totalVenta = venta.cantidad * venta.precio;
+    totalesPorFecha.set(venta.fecha, (totalesPorFecha.get(venta.fecha) || 0) + totalVenta);
+}
 
-const diaVacio = "2026-12-25";
-const reporteDia2 = ventasDelDia(ventas, diaVacio);
-console.log(`\nDia: ${diaVacio} (Sin registros)`);
-console.log(`  Total: ${formatoCOP(reporteDia2.total)} | Unidades: ${reporteDia2.unidades}`);
+// Convertimos a un arreglo de totales diarios
+const ventasDiariasReales = Array.from(totalesPorFecha.values());
 
+if (ventasDiariasReales.length >= 3) {
+    const mejorRacha = analitica.mejorSemana(ventasDiariasReales, 3);
+    console.log(`Mejor racha de 3 días iniciando en el índice ${mejorRacha.mejorInicio} (Total: ${formatoCOP(mejorRacha.maxTotal)})`);
+} else {
+    console.log("No hay suficientes días para calcular una racha.");
+}
+
+// --- FIN DE MEDICIÓN DE TIEMPO ---
+const finTiempo = performance.now();
+console.log(`\n==========================================`);
+console.log(`TIEMPO TOTAL: ${(finTiempo - inicioTiempo).toFixed(2)} ms`);
+console.log(`==========================================`);
 
 

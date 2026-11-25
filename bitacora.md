@@ -633,3 +633,207 @@ function clientesRecurrentesOptimizado(ventas) {
     return Array.from(recurrentes); 
 }
 
+```
+-----------------------------
+
+
+## MINI RETO 9: Optimizacion con Set y Map, y Analisis de Trade-off
+# Diccionario de datos y análisis de casos borde
+
+## 1. Diccionario de datos
+
+El diccionario de datos describe cada campo de la tabla, su significado, tipo de dato y reglas de validación.
+
+| Campo | Tipo en JavaScript | Descripción | Validaciones |
+|---|---|---|---|
+| `id` | `Number` | Identificador único de cada venta. | Debe ser un entero positivo y no repetirse. |
+| `fecha` | `String` | Fecha en la que se realizó la venta. | Debe tener formato `YYYY-MM-DD` y ser una fecha válida. |
+| `cliente` | `String` | Código que identifica al cliente. | No puede estar vacío y debe seguir el formato `C01`, `C02`, etc. |
+| `producto` | `String` | Nombre del producto vendido. | No puede estar vacío y debe corresponder a un producto registrado. |
+| `ciudad` | `String` | Ciudad donde se encuentra el cliente. | No puede estar vacía y debe tener un formato uniforme. |
+| `cantidad` | `Number` | Número de unidades compradas. | Debe ser un entero mayor que cero. |
+| `precio` | `Number` | Precio unitario del producto. | Debe ser un número positivo y finito. |
+
+### ¿Qué significa cada dato?
+- `id`: permite identificar cada venta sin confundirla con otra.
+- `fecha`: conviene almacenarla como texto en formato ISO (`YYYY-MM-DD`) y convertirla a `Date` cuando necesites realizar operaciones con fechas.
+- `cliente`: es un código de identificación, no un número para realizar operaciones matemáticas.
+- `producto`: permite identificar qué artículo se vendió.
+- `ciudad`: debes unificar nombres como `medellín` y `Medellín`.
+- `cantidad`: representa las unidades vendidas.
+- `precio`: representa el precio de una unidad, no el valor total de la venta.
+
+---
+
+## 2. Identificación de casos borde
+
+Los casos borde son situaciones especiales o inesperadas que pueden provocar errores en un programa si no se contemplan durante su desarrollo.
+
+| Caso borde | Dato encontrado o ejemplo | Problema | Solución |
+|---|---|---|---|
+| Cantidad igual a cero| ID 8: cantidad `0` | No representa una venta válida. | Rechazar el registro o marcarlo como inválido para revisión. |
+| Ciudad con minúsculas| ID 5: `medellín` | Puede generar registros duplicados al agrupar ciudades. | Normalizar el texto. |
+| ID duplicado | Dos ventas con el mismo ID | Dos ventas tendrían el mismo identificador. | Comprobar que cada ID sea único.|
+| Precio igual a cero | `precio = 0` | No representa un precio de venta válido según las reglas definidas. | Rechazarlo o revisar si se trata de una promoción gratuita. |
+| Cantidad negativa | `cantidad = -3` | Representaría una cantidad imposible en una venta normal. | Rechazar el registro o tratarlo como devolución en un proceso separado. |
+| Precio negativo | `precio = -42000` | Generaría un valor total negativo. | Rechazarlo o manejarlo como ajuste/devolución por separado. |
+| Fecha incorrecta | `2026-15-40` | No corresponde a una fecha válida. | Validar el calendario antes de aceptar el registro. |
+| Cliente vacío | `cliente = ""` | No se podría identificar al comprador. | Rechazar el registro. |
+| Producto vacío | `producto = ""` | No se sabría qué artículo se vendió. | Rechazar el registro. |
+| Cantidad decimal | `cantidad = 2.5` | No corresponde a unidades completas en este inventario. | Exigir un número entero. |
+
+---
+
+# Reto 2: Pseudocódigo y Lógica
+1. Iniciar el contador de registros incorrectos en cero.
+2. Recorrer los 12 registros.
+3. Comprobar si la cantidad es menor o igual a cero.
+4. Si cumple la condición, aumentar el contador en uno.
+5. Al terminar, mostrar la cantidad de registros incorrectos.
+
+**Lógica para agrupar por ciudad:**
+1. Crear un acumulador para cada ciudad.
+2. Inicializar todos los acumuladores en cero.
+3. Recorrer los 12 registros.
+4. Comprobar que la cantidad sea mayor que cero.
+5. Calcular el valor de la venta multiplicando cantidad por precio.
+6. Identificar la ciudad del registro.
+7. Sumar el valor de la venta al acumulador correspondiente.
+8. Al terminar, mostrar los ingresos de cada ciudad.
+*(Todo debe ser normalizado para evitar errores de tipeo o de datos).*
+
+---
+
+# Verificación manual con tablas de traza (Mini Reto 2)
+
+**Traza de totalVendido(ventas)**
+| ID | Cantidad | Precio | Operación | Total acumulado |
+|---|---|---|---|---|
+| 1 | 2 | 42000 | 2 * 42000 = 84000 | 84000 |
+| 2 | 1 | 26000 | 1 * 26000 = 26000 | 110000 |
+| ... | ... | ... | ... | ... |
+| 12 | 3 | 26000 | 3 * 26000 = 78000 | 985000 |
+*Resultado manual: 985000. Resultado del programa: 985000. Los resultados coinciden.*
+
+---
+
+# Bitácora de Desarrollo: Medición de Rendimiento y Complejidad Algorítmica (Mini Reto 5)
+
+## 1. Predicciones vs Realidad
+*   **Funciones con bucles (`totalVendido`, `ventaMayor`, `totalPorCiudad`):** Al multiplicar `n` por 10, las operaciones se multiplicaron por 10.
+*   **Función de acceso directo (`primeraVenta`):** El número de operaciones fue siempre 1, sin importar si hay 10 o 100.000 ventas.
+
+## 2. Clasificación Big O y Justificación Técnica
+*   **`totalVendido` (O(n)):** Bucle `for...of` que recorre el arreglo una sola vez.
+*   **`ventaMayor` (O(n)):** Itera sobre todo el arreglo para comparar cada venta con el máximo actual.
+*   **`totalPorCiudad` (O(n)):** Utiliza `.reduce()`, iterando sobre todos los elementos exactamente una vez.
+*   **`primeraVenta` (O(1)):** Acceso directo a la posición `[0]`. Realiza exactamente 1 operación.
+
+---
+
+# Reto 6: Diagnóstico de Complejidad (O(n²))
+
+Al ejecutar la función original `clientesRecurrentes` (con dos bucles `for` anidados) con distintos tamaños, se evidenció que al duplicar el tamaño de la entrada, **el tiempo de ejecución se cuadruplica**.
+
+**Estimación para 1,000,000 de ventas:**
+*   Para llegar de 100,000 a 1,000,000, los datos crecen 10 veces.
+*   Como la complejidad es \(O(n^2)\), el tiempo crecerá \(10^2 = 100\) veces.
+*   Cálculo: \(36.5 \text{ segundos} \times 100 = 3,650 \text{ segundos}\) (**Más de 60 minutos**).
+
+**El Costo Oculto de `includes()`:**
+El método `recurrentes.includes(...)` recorre el arreglo internamente. Al estar dentro de los dos bucles, eleva la complejidad real a **O(n³)**.
+
+---
+
+# Mini Reto 7: Complejidad Espacial (Trade-offs)
+
+Se compararon dos enfoques para calcular ventas por ciudad:
+1.  **`totalCiudadCadena` (4 Traversals):** Usa `.map()`, `.filter()`, `.map()` y `.reduce()`. Crea **3 arreglos nuevos** en memoria.
+2.  **`totalCiudadUnPasada` (1 Traversal):** Usa un solo `for...of`. Crea **0 arreglos nuevos**.
+
+**Decisión Técnica:** Se elige `totalCiudadUnPasada` en producción. Protege el servidor (memoria limitada) garantizando un consumo de memoria \(O(1)\) con el mismo resultado exacto.
+
+---
+
+# MINI RETO 10: Estructuras Clave-Valor y Optimización de Búsquedas
+
+## 1. Resolución de Combos (Fuerza Bruta vs Map)
+*   **Fuerza Bruta (`comboRegaloFuerzaBruta`):** Usa dos bucles `for` anidados para comparar cada producto con todos los demás. Complejidad Temporal: **O(n²)**. Complejidad Espacial: **O(1)**.
+*   **Optimizado (`comboRegaloOptimizado`):** Usa un `Map` para guardar los precios vistos y calcular el complemento (`valor - precioActual`) en una sola pasada. La búsqueda en el Map es O(1). Complejidad Temporal: **O(n)**. Complejidad Espacial: **O(n)** (por el Map creado).
+
+### Traza del Combo Optimizado (Buscando 87,000)
+1. Revisa `Origen Nariño 250 g` (26,000). Complemento: 61,000. No está en el Map. Lo guarda.
+2. Revisa `Origen Huila 500 g` (42,000). Complemento: 45,000. No está en el Map. Lo guarda.
+3. Revisa `Origen Sierra 500 g` (45,000). Complemento: **42,000**. **¡Está en el Map!** Retorna `[Origen Huila 500 g, Origen Sierra 500 g]`.
+
+## 2. Regla de Desempate en `productoEstrellaPorCiudad`
+Cuando dos o más productos tienen exactamente la misma cantidad de ventas (frecuencia) en una ciudad, el algoritmo implementado resuelve el empate **quedándose con el primer producto que encontró en el orden de inserción del Map**. 
+Esto ocurre porque la condición de actualización es estrictamente mayor (`if (frecuencia > maxFrecuencia)`). Si la frecuencia es igual, el algoritmo no actualiza la variable y mantiene el primer producto que alcanzó ese máximo.
+
+## 3. Primer Cliente Único (`primerClienteUnico`)
+El objetivo es encontrar al primer cliente en orden de ventas que **solo aparezca una vez en todo el historial**. 
+*   **Corrección lógica:** Inicialmente se contaron los productos, pero al leer la rúbrica detenidamente, se ajustó la lógica para contar las frecuencias de los **clientes**.
+*   Al recorrer los datos del Día 1, el cliente **C04** (ID 5) es el primero que tiene una frecuencia global igual a 1. Por ende, el algoritmo devuelve correctamente `C04`.
+
+## 4. Justificación de Complejidad Algorítmica (Big O)
+Los criterios exigen que las tres funciones sean O(n). Aquí la justificación técnica:
+
+*   **`comboRegaloOptimizado` (Tiempo: O(n) / Espacio: O(n)):**
+    *   *Justificación:* Utiliza un solo bucle `for` para recorrer el catálogo una única vez. La búsqueda del complemento en el `Map` se hace en tiempo constante O(1). El espacio es O(n) porque en el peor de los casos (no hay combinación) guardaremos todos los productos en el Map.
+*   **`productoEstrellaPorCiudad` (Tiempo: O(n) / Espacio: O(k)):**
+    *   *Justificación:* Recorre el arreglo de ventas una sola vez para llenar un Map anidado (Ciudad -> Producto -> Frecuencia). Luego, recorre los Map creados, cuyo tamaño total está acotado por `n`. Por lo tanto, el tiempo crece linealmente con la cantidad de ventas.
+*   **`primerClienteUnico` (Tiempo: O(n) / Espacio: O(n)):**
+    *   *Justificación:* Utiliza dos recorridos secuenciales (no anidados) sobre el arreglo de ventas. El primero llena un Map de frecuencias (O(n)), y el segundo busca en el Map en tiempo O(1) por cada venta (O(n)). En notación Big O, \(O(n) + O(n)\) se simplifica a **O(n)**.
+
+## 5. Casos Borde Probados
+*   **Sin solución:** Si no hay combinación para el combo, devuelve `null`.
+*   **Empates:** Documentado en el punto 2.
+*   **Arreglo vacío:** Si las ventas están vacías, los mapas se crean vacíos y el algoritmo devuelve `null` sin romperse.
+
+
+--------------------------------------------------------------------
+
+## MINI RETO 11: La mejor racha y el presupuesto exacto
+
+### 1. Traza Manual de las Primeras Posiciones (Ventana Deslizante, k=7)
+Para comprender el funcionamiento del algoritmo, se analiza el arreglo de ventas diarias de septiembre. La ventana deslizante optimiza el cálculo al no sumar los 7 días desde cero en cada iteración, sino reutilizando la suma anterior.
+
+Arreglo base: `[320, 410, 280, 390, 510, 620, 700, 300, 290, ...]`
+
+| Posición | Días (Índices) | Operación Matemática (Fórmula de Ventana) | Suma Total |
+| :--- | :--- | :--- | :--- |
+| 1 | 0 al 6 | Suma inicial iterativa: 320 + 410 + 280 + 390 + 510 + 620 + 700 | **3230** |
+| 2 | 1 al 7 | 3230 - 320 (día 0 que sale) + 300 (día 7 que entra) | **3210** |
+| 3 | 2 al 8 | 3210 - 410 (día 1 que sale) + 290 (día 8 que entra) | **3090** |
+
+Tras evaluar todo el arreglo, la ejecución confirmó que la mejor racha ocurre en el índice 23 (inicio de la ventana) con un total de **3670**. Ambas versiones (fuerza bruta y ventana deslizante) arrojaron exactamente el mismo resultado, validando la correcta implementación del algoritmo.
+
+### 2. Traza de los Punteros (Presupuesto: 100,000)
+Para resolver la búsqueda del par de productos, primero se ordena el catálogo numéricamente por precio de menor a mayor:
+`[18000 (Filtros), 26000 (Nariño), 35000 (Taza), 42000 (Huila 500g), 45000 (Sierra), 79000 (Huila 1kg), 95000 (Prensa), 120000 (Molino)]`
+
+Se utilizan dos punteros: `izquierda` (apunta al más barato) y `derecha` (apunta al más caro).
+
+*   **Paso 1:** Izq = 18,000. Der = 120,000. Suma = **138,000**.
+    *   *Acción:* La suma excede el presupuesto. El puntero `derecha` se mueve a la izquierda para buscar un producto más económico.
+*   **Paso 2:** Izq = 18,000. Der = 95,000. Suma = **113,000**.
+    *   *Acción:* Excede el presupuesto. `derecha` se mueve a la izquierda.
+*   **Paso 3:** Izq = 18,000. Der = 79,000. Suma = **97,000**.
+    *   *Acción:* Es una suma válida (no supera los 100,000). Se registra como el `mejorPar` actual. Como queremos acercarnos más al límite, movemos el puntero `izquierda` a la derecha para intentar sumar un producto de mayor valor.
+*   **Paso 4:** Izq = 26,000. Der = 79,000. Suma = **105,000**.
+    *   *Acción:* Excede el presupuesto. `derecha` se mueve a la izquierda.
+*   **Paso 5:** Izq = 26,000. Der = 45,000. Suma = **71,000**.
+    *   *Acción:* Es válida, pero menor a 97,000. No actualiza el récord. `izquierda` se mueve a la derecha.
+*   **Pasos posteriores:** El algoritmo continúa moviendo los punteros hasta que se cruzan, sin encontrar una suma mayor a 97,000 que no supere el presupuesto.
+
+**Resultado final confirmado:** Filtros de papel ($18,000) + Origen Huila 1 kg ($79,000) = **$97,000**.
+
+### 3. Justificación de Complejidad Algorítmica (Big O)
+*   **`mejorSemana` es O(n) en tiempo y O(1) en espacio:** Utiliza un único bucle `for` que recorre el arreglo de días una sola vez. En cada iteración realiza operaciones aritméticas de tiempo constante. El tiempo de ejecución crece de forma lineal y directamente proporcional al número de días. No crea estructuras de datos auxiliares, por lo que su espacio es constante.
+*   **`parMasCercano` es O(n log n) en tiempo y O(n) en espacio:** Aunque el bucle `while` de los dos punteros es O(n), el cuello de botella es el método `sort()` previo. Los algoritmos de ordenamiento eficientes en JavaScript (como Timsort) tienen una complejidad de O(n log n). Como O(n log n) domina asintóticamente a O(n), la función completa se clasifica como O(n log n). La complejidad espacial es O(n) debido a la creación de una copia del catálogo (usando el operador spread `[...]`) para garantizar la inmutabilidad de los datos originales.
+
+### 4. Casos Borde Validados
+*   **Ventana mayor a los datos (`k > dias.length`):** La función retorna `null` de forma segura, evitando errores de desbordamiento de índices o cálculos incorrectos.
+*   **Presupuesto insuficiente:** Si el presupuesto es menor a la suma de los dos productos más baratos (ej. $40,000), los punteros se cruzan sin encontrar ninguna suma válida. La función retorna `null`, cumpliendo con el requisito de no superar nunca el presupuesto.
+---------------------------------------------
+
